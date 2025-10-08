@@ -1,0 +1,35 @@
+{
+  "targets": [
+    "swap",
+    "final"
+  ],
+  "passes": [
+    {
+      "name": "dark_vision",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "program": "ash_hollow_requiem_of_the_dead:shaders/program/dark_vision",
+      "samplers": [
+        {
+          "name": "Texture",
+          "id": "swap"
+        }
+      ],
+      "uniforms": [
+        {
+          "name": "Saturation",
+          "values": [ 0.0 ]
+        },
+        {
+          "name": "DarkGamma",
+          "values": [ 0.05 ]
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

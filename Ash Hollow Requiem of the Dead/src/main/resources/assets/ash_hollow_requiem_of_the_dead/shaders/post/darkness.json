@@ -1,0 +1,31 @@
+{
+  "targets": [
+    "swap"
+  ],
+  "passes": [
+    {
+      "name": "darkness",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+        {
+          "name": "DarknessLevel",
+          "values": [ 100 ]
+        },
+        {
+          "name": "SpotlightRadius",
+          "values": [ 0.15 ]
+        },
+        {
+          "name": "SpotlightIntensity",
+          "values": [ 0.9 ]
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}
