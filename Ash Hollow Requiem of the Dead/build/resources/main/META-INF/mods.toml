@@ -1,0 +1,24 @@
+modLoader="javafml"
+loaderVersion="[47,)"
+license="All Rights Reserved"
+
+[[mods]]
+modId="ash_hollow_requiem_of_the_dead"
+version="1.0.0"
+displayName="Ash Hollow: Requiem of the Dead"
+authors="YourName"
+description='''Ash Hollow: Requiem of the Dead\n\nA dark and atmospheric mod with vision enhancement capabilities.'''
+
+[[dependencies.mymodid]]
+    modId="forge"
+    mandatory=true
+    versionRange="[47,)"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.mymodid]]
+    modId="minecraft"
+    mandatory=true
+    versionRange="[1.20.1,1.21)"
+    ordering="NONE"
+    side="BOTH"

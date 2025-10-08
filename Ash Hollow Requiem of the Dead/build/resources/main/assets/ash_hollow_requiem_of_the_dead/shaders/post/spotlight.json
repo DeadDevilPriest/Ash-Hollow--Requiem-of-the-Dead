@@ -1,0 +1,86 @@
+{
+  "targets": [
+    "swap",
+    "final"
+  ],
+  "passes": [
+    {
+      "name": "spotlight",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "auxtargets": [
+        {
+          "name": "DepthSampler",
+          "id": "minecraft:main:depth"
+        }
+      ],
+      "uniforms": [
+        {
+          "name": "ScreenSize",
+          "values": [ 1920.0, 1080.0 ]
+        },
+        {
+          "name": "PlayerPos",
+          "values": [ 960.0, 540.0 ]
+        },
+        {
+          "name": "PlayerDepth",
+          "values": [ 0.5 ]
+        },
+        {
+          "name": "SpotlightRadius",
+          "values": [ 200.0 ]
+        },
+        {
+          "name": "SphereFalloff",
+          "values": [ 0.7 ]
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}
+{
+  "targets": [
+    "swap",
+    "final"
+  ],
+  "passes": [
+    {
+      "name": "spotlight",
+      "intarget": "minecraft:main",
+      "outtarget": "swap",
+      "uniforms": [
+        {
+          "name": "ScreenSize",
+          "values": [ 1.0, 1.0 ]
+        },
+        {
+          "name": "PlayerPos",
+          "values": [ 0.5, 0.5 ]
+        },
+        {
+          "name": "PlayerDepth",
+          "values": [ 0.5 ]
+        },
+        {
+          "name": "SpotlightRadius",
+          "values": [ 200.0 ]
+        },
+        {
+          "name": "SphereFalloff",
+          "values": [ 0.7 ]
+        }
+      ]
+    },
+    {
+      "name": "blit",
+      "intarget": "swap",
+      "outtarget": "minecraft:main"
+    }
+  ]
+}

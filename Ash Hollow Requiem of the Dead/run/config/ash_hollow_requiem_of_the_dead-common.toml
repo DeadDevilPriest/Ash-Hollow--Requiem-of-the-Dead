@@ -1,0 +1,20 @@
+#Whether to log the dirt block on common setup
+logDirtBlock = true
+#A magic number
+#Range: > 0
+magicNumber = 42
+#What you want the introduction message to be for the magic number
+magicNumberIntroduction = "The magic number is... "
+#A list of items to log on common setup.
+items = ["minecraft:iron_ingot"]
+#Gamma value when Dark Vision is active (lower = darker)
+#Range: 0.0 ~ 1.0
+darkVisionGamma = 0.5
+#Saturation level when Dark Vision is active (0.0 = no color, 1.0 = full color)
+#Range: 0.0 ~ 1.0
+darkVisionSaturation = 0.0
+#Whether hostile mobs should remain colored in red when Dark Vision is active
+darkVisionShowHostiles = true
+#Whether clue objects should remain colored when Dark Vision is active
+darkVisionShowClues = true
+

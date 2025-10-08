@@ -1,0 +1,15 @@
+{
+  "key.ash_hollow_requiem_of_the_dead.dark_vision": "Toggle Dark Vision",
+  "key.categories.ash_hollow_requiem_of_the_dead": "Ash Hollow",
+  "key.category.ash_hollow_requiem_of_the_dead": "Ash Hollow",
+  
+  "config.ash_hollow_requiem_of_the_dead.darkVisionGamma": "Dark Vision Gamma",
+  "config.ash_hollow_requiem_of_the_dead.darkVisionSaturation": "Dark Vision Saturation",
+  "config.ash_hollow_requiem_of_the_dead.darkVisionShowHostiles": "Dark Vision Show Hostiles",
+  "config.ash_hollow_requiem_of_the_dead.darkVisionShowClues": "Dark Vision Show Clues",
+
+  "death.attack.harpoon": "%1$s was impaled by a harpoon",
+  "death.attack.harpoon.player": "%1$s was impaled by %2$s's harpoon",
+  "death.attack.bleeding": "%1$s bled to death",
+  "death.attack.bleeding.player": "%1$s bled to death from %2$s's wound"
+}

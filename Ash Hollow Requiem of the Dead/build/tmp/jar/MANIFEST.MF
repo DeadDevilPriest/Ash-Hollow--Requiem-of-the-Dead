@@ -1,0 +1,9 @@
+Manifest-Version: 1.0
+Specification-Title: ash_hollow_requiem_of_the_dead
+Specification-Vendor: YourName
+Specification-Version: 1
+Implementation-Title: ash-hollow-requiem-of-the-dead
+Implementation-Version: 1.0.0
+Implementation-Vendor: YourName
+Implementation-Timestamp: 2025-06-07T20:57:02+0200
+
