@@ -1,0 +1,4 @@
+{
+  "vertex": "shaders/core/fullscreen.vsh",
+  "fragment": "shaders/core/darkness_fog.fsh"
+}

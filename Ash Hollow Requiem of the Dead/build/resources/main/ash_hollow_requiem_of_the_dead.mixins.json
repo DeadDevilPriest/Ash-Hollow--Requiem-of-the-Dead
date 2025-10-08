@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "Ash_Hollow_Requiem.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "ash_hollow_requiem_of_the_dead.refmap.json",
+  "mixins": [
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

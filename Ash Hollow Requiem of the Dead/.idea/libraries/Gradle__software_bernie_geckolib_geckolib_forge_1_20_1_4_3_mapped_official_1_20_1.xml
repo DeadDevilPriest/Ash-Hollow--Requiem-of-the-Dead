@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="Gradle: software.bernie.geckolib:geckolib-forge-1.20.1:4.3_mapped_official_1.20.1" type="java-imported" external-system-id="GRADLE">
+    <properties groupId="software.bernie.geckolib" artifactId="geckolib-forge-1.20.1" version="4.3_mapped_official_1.20.1" baseVersion="4.3_mapped_official_1.20.1" />
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/forge_gradle/deobf_dependencies/software/bernie/geckolib/geckolib-forge-1.20.1/4.3_mapped_official_1.20.1/geckolib-forge-1.20.1-4.3_mapped_official_1.20.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/forge_gradle/deobf_dependencies/software/bernie/geckolib/geckolib-forge-1.20.1/4.3_mapped_official_1.20.1/geckolib-forge-1.20.1-4.3_mapped_official_1.20.1-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
