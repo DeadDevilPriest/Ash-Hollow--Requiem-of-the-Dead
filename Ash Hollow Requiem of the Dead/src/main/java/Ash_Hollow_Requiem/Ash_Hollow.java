@@ -22,6 +22,8 @@ public class Ash_Hollow {
         Ash_Hollow_Requiem.common.entities.ModEntities.ENTITIES.register(modEventBus);
         ModItems.CREATIVE_MODE_TABS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
+        //ModDamageSources.DAMAGE.register(modEventBus);
+        //ModDamageTypes.DAMAGE.register(modEventBus);
 
         // Forge event listeners
         MinecraftForge.EVENT_BUS.register(AudioEventHandler.class);
