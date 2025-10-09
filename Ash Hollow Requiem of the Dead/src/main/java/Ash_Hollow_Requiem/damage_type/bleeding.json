@@ -12,5 +12,5 @@
     "is_fire": false,
     "is_projectile": false
   },
-    "death_message_type": "indirect"
+  "death_message_type": "indirect"
 }
