@@ -27,7 +27,7 @@ public class BleedingEffect extends MobEffect {
         // Get a bleeding-type DamageSource from your ModDamageTypes
         DamageSource bleedingSource = ModDamageTypes.bleedingDamageSource(level, entity);
 
-        // Apply 1 damage per tick (or more if you want to scale with amplifier)
+        // Apply 0.5 damage per tick (or more if you want to scale with amplifier)
         entity.hurt(bleedingSource, 0.5F + amplifier);
     }
 
