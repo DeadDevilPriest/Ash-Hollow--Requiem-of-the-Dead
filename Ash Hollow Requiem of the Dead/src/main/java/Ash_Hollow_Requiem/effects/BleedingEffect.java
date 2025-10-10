@@ -1,6 +1,6 @@
 package Ash_Hollow_Requiem.effects;
 
-import Ash_Hollow_Requiem.damage.ModDamageTypes;
+import Ash_Hollow_Requiem.damage.ModDamageSources;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
@@ -25,7 +25,7 @@ public class BleedingEffect extends MobEffect {
         }
 
         // Get a bleeding-type DamageSource from your ModDamageTypes
-        DamageSource bleedingSource = ModDamageTypes.bleedingDamageSource(level, entity);
+        DamageSource bleedingSource = ModDamageSources.bleedingDamageSource(level, entity);
 
         // Apply 0.5 damage per tick (or more if you want to scale with amplifier)
         entity.hurt(bleedingSource, 0.5F + amplifier);

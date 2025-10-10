@@ -43,7 +43,7 @@ public class HarpoonEntity extends AbstractArrow implements GeoEntity, Holder<Da
 
     @Override
     protected ItemStack getPickupItem() {
-        return new ItemStack(ModItems.Harpoon.get());
+        return new ItemStack(ModItems.HARPOON.get());
     }
 
     @Override

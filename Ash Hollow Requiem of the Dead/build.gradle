@@ -43,13 +43,17 @@ dependencies {
 }
 
 // This is the repositories block in your build.gradle. NOT the one in publishing, or in buildscript. If it does not exist already, create it.
-maven {
+repositories {
+    mavenCentral() // or other existing repos
+
+    maven {
         name = 'GeckoLib'
         url 'https://dl.cloudsmith.io/public/geckolib3/geckolib/maven/'
         content {
-                includeGroupByRegex("software\\.bernie.*")
-                includeGroup("com.eliotlash.mclib")
+            includeGroupByRegex("software\\.bernie.*")
+            includeGroup("com.eliotlash.mclib")
         }
+    }
 }
 
 dependencies {

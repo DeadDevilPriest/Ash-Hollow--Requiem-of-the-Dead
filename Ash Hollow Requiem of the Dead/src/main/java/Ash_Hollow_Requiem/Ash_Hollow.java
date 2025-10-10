@@ -1,5 +1,6 @@
 package Ash_Hollow_Requiem;
 
+import Ash_Hollow_Requiem.effects.ModEffects;
 import software.bernie.geckolib.GeckoLib;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -27,7 +28,5 @@ public class Ash_Hollow {
         MinecraftForge.EVENT_BUS.register(KeyBindingScreen.class);
         MinecraftForge.EVENT_BUS.register(MicrophoneSelectionScreen.class);
         MinecraftForge.EVENT_BUS.register(AshHollowOptionScreen.class);
-        MinecraftForge.EVENT_BUS.register(ModDamageSources.class);
-        MinecraftForge.EVENT_BUS.register(ModEffects.class);
     }
 }

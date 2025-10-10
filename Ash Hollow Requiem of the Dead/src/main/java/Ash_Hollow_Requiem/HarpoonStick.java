@@ -12,6 +12,7 @@ public class HarpoonStick extends Item {
     public HarpoonStick(Properties properties) {
         super(properties);
     }
+
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         ItemStack stack = player.getItemInHand(hand);
