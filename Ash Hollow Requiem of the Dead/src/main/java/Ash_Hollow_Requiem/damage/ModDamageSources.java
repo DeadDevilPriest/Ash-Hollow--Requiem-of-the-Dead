@@ -25,4 +25,10 @@ public class ModDamageSources {
     public static DamageSource bleedingDamageSource(Level level, LivingEntity target) {
         return new DamageSource(getType(level, "bleeding"), target);
     }
+
+    public static DamageSource traumaDamageSource(Level level, LivingEntity target) {
+        return new DamageSource(getType(level, "trauma"), target);
+    }
+
+    
 }

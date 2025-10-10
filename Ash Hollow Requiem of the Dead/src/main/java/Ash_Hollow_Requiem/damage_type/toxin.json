@@ -1,0 +1,16 @@
+{
+  "message_id": "toxin",
+  "scaling": "never",
+  "exhaustion": 0.0,
+  "effects": {
+    "bypasses_armor": true,
+    "bypasses_shield": true,
+    "bypasses_invulnerability": false,
+    "is_explosion": false,
+    "is_fall": false,
+    "is_magic": false,
+    "is_fire": false,
+    "is_projectile": false
+  },
+  "death_message_type": "indirect"
+}
