@@ -39,7 +39,7 @@ public class ModItems {
                     // Set the icon (the item shown on the tab)
                     .icon(() -> new ItemStack(HARPOON.get()))
                     // Set the title
-                    .title(Component.translatable("creativetab.ash_hollow_requiem_of_the_dead.ash_hollow_tab"))
+                    .title(Component.translatable("Ash Hollow: Requiem of the Dead"))
                     // Add items to the tab
                     .displayItems((parameters, output) -> {
                         output.accept(HARPOON_STICK.get());

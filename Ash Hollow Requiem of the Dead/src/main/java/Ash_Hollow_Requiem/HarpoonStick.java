@@ -6,7 +6,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import Ash_Hollow_Requiem.common.entities.ModEntities;
 
 public class HarpoonStick extends Item {
     public HarpoonStick(Properties properties) {

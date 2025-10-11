@@ -1,0 +1,16 @@
+{
+  "message_id": "void",
+  "scaling": "never",
+  "exhaustion": 0.0,
+  "effects": {
+    "bypasses_armor": true,
+    "bypasses_shield": true,
+    "bypasses_invulnerability": true,
+    "is_explosion": false,
+    "is_fall": false,
+    "is_magic": true,
+    "is_fire": false,
+    "is_projectile": false
+  },
+  "death_message_type": "indirect"
+}

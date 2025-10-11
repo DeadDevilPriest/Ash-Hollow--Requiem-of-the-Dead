@@ -39,6 +39,7 @@ public class HarpoonEntity extends AbstractArrow implements GeoEntity, Holder<Da
     @Override
     public void registerControllers(AnimatableManager.ControllerRegistrar controllers) {
         // Optional: add animation controllers here
+
     }
 
     @Override
@@ -62,9 +63,6 @@ public class HarpoonEntity extends AbstractArrow implements GeoEntity, Holder<Da
                     120, // 6 seconds (20 ticks * 6)
                     0   // amplifier level
             ));
-
-            // Optional: destroy the harpoon entity after impact
-            this.discard();
         }
     }
 

@@ -19,7 +19,7 @@ public class Ash_Hollow {
 
         // Register items, entities, creative tabs
         ModItems.ITEMS.register(modEventBus);
-        Ash_Hollow_Requiem.common.entities.ModEntities.ENTITIES.register(modEventBus);
+        Ash_Hollow_Requiem.ModEntities.ENTITIES.register(modEventBus);
         ModItems.CREATIVE_MODE_TABS.register(modEventBus);
         ModEffects.EFFECTS.register(modEventBus);
 

@@ -1,4 +1,4 @@
-package Ash_Hollow_Requiem.common.entities;
+package Ash_Hollow_Requiem;
 
 
 import Ash_Hollow_Requiem.Ash_Hollow;

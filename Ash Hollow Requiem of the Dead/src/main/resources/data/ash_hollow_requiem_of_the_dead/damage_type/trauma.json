@@ -1,0 +1,16 @@
+{
+  "message_id": "trauma",
+  "scaling": "never",
+  "exhaustion": 0.1,
+  "effects": {
+    "bypasses_armor": false,
+    "bypasses_shield": false,
+    "bypasses_invulnerability": false,
+    "is_explosion": false,
+    "is_fall": false,
+    "is_magic": false,
+    "is_fire": false,
+    "is_projectile": false
+  },
+  "death_message_type": "default"
+}
