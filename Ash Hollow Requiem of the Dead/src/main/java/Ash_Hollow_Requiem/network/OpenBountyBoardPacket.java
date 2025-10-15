@@ -1,6 +1,7 @@
 package Ash_Hollow_Requiem.network;
 
-import Ash_Hollow_Requiem.BountyBoardScreen;
+import Ash_Hollow_Requiem.interfaces.BountyBoardScreen;
+import Ash_Hollow_Requiem.playerdata.PlayerDataAPI;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
@@ -9,6 +10,10 @@ import net.minecraftforge.network.NetworkEvent;
 
 import java.util.function.Supplier;
 
+/**
+ * Packet sent from server to client to open the bounty board
+ * Sends player's current coin and token balance
+ */
 public class OpenBountyBoardPacket {
     private final int coins;
     private final int tokens;
@@ -36,5 +41,15 @@ public class OpenBountyBoardPacket {
     @OnlyIn(Dist.CLIENT)
     private static void openClientScreen(int coins, int tokens) {
         Minecraft.getInstance().setScreen(new BountyBoardScreen(coins, tokens));
+    }
+
+    /**
+     * Helper method to create packet from player data
+     * Call this on the server side when opening the board
+     */
+    public static OpenBountyBoardPacket fromPlayer(net.minecraft.server.level.ServerPlayer player) {
+        int coins = PlayerDataAPI.getCoins(player);
+        int tokens = PlayerDataAPI.getTokens(player);
+        return new OpenBountyBoardPacket(coins, tokens);
     }
 }

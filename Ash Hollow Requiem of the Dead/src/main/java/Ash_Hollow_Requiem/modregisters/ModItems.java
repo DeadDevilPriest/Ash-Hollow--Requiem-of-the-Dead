@@ -1,7 +1,8 @@
-package Ash_Hollow_Requiem;
+package Ash_Hollow_Requiem.modregisters;
 
+import Ash_Hollow_Requiem.Ash_Hollow;
+import Ash_Hollow_Requiem.HarpoonStick;
 import Ash_Hollow_Requiem.harpoon.item.HarpoonItem;
-import Ash_Hollow_Requiem.interfaces.ModCreativeTab;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.DeferredRegister;

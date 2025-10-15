@@ -1,6 +1,6 @@
 package Ash_Hollow_Requiem.harpoon.entity;
 
-import Ash_Hollow_Requiem.ModItems;
+import Ash_Hollow_Requiem.modregisters.ModItems;
 import Ash_Hollow_Requiem.damage.ModDamageSources;
 import Ash_Hollow_Requiem.effects.ModEffects;
 import net.minecraft.world.entity.Entity;

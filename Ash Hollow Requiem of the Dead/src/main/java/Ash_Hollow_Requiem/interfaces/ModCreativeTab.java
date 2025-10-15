@@ -8,7 +8,7 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
 
 
-import static Ash_Hollow_Requiem.ModItems.*;
+import static Ash_Hollow_Requiem.modregisters.ModItems.*;
 
 public class ModCreativeTab {
     public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TABS =

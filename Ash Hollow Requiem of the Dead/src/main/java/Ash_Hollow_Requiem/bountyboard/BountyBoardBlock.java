@@ -1,7 +1,6 @@
 package Ash_Hollow_Requiem.bountyboard;
 
-import Ash_Hollow_Requiem.BountyBoardScreen;
-import Ash_Hollow_Requiem.interfaces.*;
+import Ash_Hollow_Requiem.interfaces.BountyBoardScreen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;

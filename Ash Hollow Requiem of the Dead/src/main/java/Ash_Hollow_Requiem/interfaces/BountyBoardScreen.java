@@ -1,550 +1,330 @@
-// ========================================
-// BountyBoardScreen.java
-// ========================================
-package Ash_Hollow_Requiem;
+package Ash_Hollow_Requiem.interfaces;
 
+import Ash_Hollow_Requiem.bounty.*;
+import Ash_Hollow_Requiem.playerdata.PlayerDataAPI;
+import Ash_Hollow_Requiem.renderer.MerchantGuiRenderer;
+import Ash_Hollow_Requiem.renderer.MerchantGuiRenderer.MerchantRotation;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BountyBoardScreen extends Screen {
     private static final ResourceLocation BOARD_TEXTURE = new ResourceLocation("ash_hollow_requiem_of_the_dead", "textures/gui/bounty_board.png");
-    private static final int BOARD_WIDTH = 256;
-    private static final int BOARD_HEIGHT = 240;
 
-    private List<Bounty> normalBounties;
-    private List<BossBounty> bossBounties;
-    private int playerCoins;
-    private int playerBossTokens;
+    // Base dimensions for GUI Scale 3 (largest)
+    private static final int BASE_BOARD_WIDTH = 300;
+    private static final int BASE_BOARD_HEIGHT = 200;
+    private static final int ENTITY_CLICK_RADIUS = 50;
 
-    private Button tokenMerchantButton;
-    private Button lootShopButton;
-    private Button myHuntsButton;
+    // Bounty categories
+    public enum BountyCategory {
+        BOUNTY("Bounty", ChatFormatting.GREEN),
+        SPECIAL("Special", ChatFormatting.BLUE),
+        HORDE("Horde", ChatFormatting.YELLOW),
+        ELITE("Elite", ChatFormatting.GOLD),
+        BOSS("Boss", ChatFormatting.DARK_RED),
+        EVENT("Event", ChatFormatting.LIGHT_PURPLE);
+
+        private final String displayName;
+        private final ChatFormatting color;
+
+        BountyCategory(String displayName, ChatFormatting color) {
+            this.displayName = displayName;
+            this.color = color;
+        }
+
+        public String getDisplayName() { return displayName; }
+        public ChatFormatting getColor() { return color; }
+    }
+
+    // Store 8 bounties per category
+    private Map<BountyCategory, List<Bounty>> categoryBounties = new HashMap<>();
+
+    // Merchant rendering data
+    private MerchantRotation tokenMerchantRotation;
+    private MerchantRotation lootMerchantRotation;
+
+    // Dynamic positions calculated based on GUI scale
+    private int scaledBoardWidth;
+    private int scaledBoardHeight;
+    private int boardX;
+    private int boardY;
+
+    private int tokenMerchantX;
+    private int tokenMerchantY;
+    private int lootMerchantX;
+    private int lootMerchantY;
+
+    // Category buttons
+    private Button[] categoryButtons = new Button[BountyCategory.values().length];
 
     public BountyBoardScreen(int coins, int tokens) {
         super(Component.literal("Bounty Board"));
-        this.playerCoins = coins;
-        this.playerBossTokens = tokens;
-        this.normalBounties = new ArrayList<>();
-        this.bossBounties = new ArrayList<>();
+        this.tokenMerchantRotation = new MerchantRotation();
+        this.lootMerchantRotation = new MerchantRotation();
         loadBounties();
     }
 
     private void loadBounties() {
-        // Load 5 normal bounties
-        normalBounties.add(new Bounty("Hollow Bandit", 3, "Ash Hollow Mines", 150, 3));
-        normalBounties.add(new Bounty("Cursed Miner", 2, "Deep Caverns", 80, 2));
-        normalBounties.add(new Bounty("Spectral Wolf", 4, "Haunted Forest", 200, 5));
-        normalBounties.add(new Bounty("Vengeful Spirit", 3, "Abandoned Chapel", 120, 3));
-        normalBounties.add(new Bounty("Ash Raider", 2, "Eastern Outpost", 90, 2));
+        // Load 8 bounties for each category
+        for (BountyCategory category : BountyCategory.values()) {
+            List<Bounty> bounties = new ArrayList<>();
+            long currentTime = Minecraft.getInstance().player.level().getGameTime();
 
-        // Load 3 boss bounties
-        bossBounties.add(new BossBounty("The Wailing Revenant", 5, 15, 1000, true));
-        bossBounties.add(new BossBounty("Bone Lord of Ash", 4, 10, 750, true));
-        bossBounties.add(new BossBounty("Crimson Executioner", 5, 25, 1500, true));
+            for (int i = 0; i < 8; i++) {
+                bounties.add(BountyGenerator.generateStandardBounty(
+                        getRandomRarityForCategory(category), currentTime
+                ));
+            }
+
+            categoryBounties.put(category, bounties);
+        }
+    }
+
+    private BountyRarity getRandomRarityForCategory(BountyCategory category) {
+        int roll = new java.util.Random().nextInt(100);
+
+        return switch (category) {
+            case BOSS, EVENT -> {
+                if (roll < 30) yield BountyRarity.EPIC;
+                if (roll < 70) yield BountyRarity.LEGENDARY;
+                yield BountyRarity.EPIC;
+            }
+            case ELITE -> {
+                if (roll < 40) yield BountyRarity.RARE;
+                if (roll < 80) yield BountyRarity.EPIC;
+                yield BountyRarity.LEGENDARY;
+            }
+            default -> {
+                if (roll < 40) yield BountyRarity.COMMON;
+                if (roll < 70) yield BountyRarity.UNCOMMON;
+                if (roll < 90) yield BountyRarity.RARE;
+                yield BountyRarity.EPIC;
+            }
+        };
     }
 
     @Override
     protected void init() {
         super.init();
-        int centerX = (this.width - BOARD_WIDTH) / 2;
-        int centerY = (this.height - BOARD_HEIGHT) / 2;
 
-        // Normal bounty buttons (5 bounties)
-        int bountyStartY = centerY + 30;
-        for (int i = 0; i < normalBounties.size(); i++) {
-            Bounty bounty = normalBounties.get(i);
-            int row = i / 2;
-            int col = i % 2;
-            int x = centerX + 10 + (col * 120);
-            int y = bountyStartY + (row * 35);
+        calculateScaledDimensions();
 
-            this.addRenderableWidget(Button.builder(
-                    Component.literal(bounty.name),
-                    btn -> openBountyDetails(bounty)
-            ).bounds(x, y, 110, 30).build());
+        boardX = (this.width - scaledBoardWidth) / 2;
+        boardY = (this.height - scaledBoardHeight) / 2;
+
+        // Position merchants OUTSIDE the board (left and right)
+        int merchantSize = (int)(scaledBoardWidth * 0.15f);
+        tokenMerchantX = boardX - merchantSize - 20; // LEFT of board
+        tokenMerchantY = boardY + scaledBoardHeight / 2;
+        lootMerchantX = boardX + scaledBoardWidth + merchantSize + 20; // RIGHT of board
+        lootMerchantY = boardY + scaledBoardHeight / 2;
+
+        // Create 6 category buttons (top row)
+        BountyCategory[] categories = BountyCategory.values();
+
+        int buttonWidth = (int)(scaledBoardWidth * 0.14f);
+        int buttonHeight = (int)(scaledBoardHeight * 0.15f);
+        int buttonStartY = boardY + (int)(scaledBoardHeight * 0.12f);
+        int buttonSpacing = (int)(scaledBoardWidth * 0.015f);
+        int totalButtonWidth = (buttonWidth * 6) + (buttonSpacing * 5);
+        int buttonStartX = boardX + (scaledBoardWidth - totalButtonWidth) / 2;
+
+        for (int i = 0; i < categories.length; i++) {
+            int x = buttonStartX + (i * (buttonWidth + buttonSpacing));
+            final BountyCategory category = categories[i];
+
+            categoryButtons[i] = Button.builder(
+                    Component.literal(category.getDisplayName()).withStyle(category.getColor(), ChatFormatting.BOLD),
+                    btn -> openBountyViewer(category)
+            ).bounds(x, buttonStartY, buttonWidth, buttonHeight).build();
+
+            this.addRenderableWidget(categoryButtons[i]);
         }
 
-        // Boss bounty buttons (3 bounties)
-        int bossStartY = centerY + 120;
-        for (int i = 0; i < bossBounties.size(); i++) {
-            BossBounty boss = bossBounties.get(i);
-            int x = centerX + 10 + (i * 78);
-            int y = bossStartY;
-
-            Button bossBtn = Button.builder(
-                    Component.literal("BOSS"),
-                    btn -> openBossBountyDetails(boss)
-            ).bounds(x, y, 75, 30).build();
-
-            // Disable if not enough tokens
-            if (playerBossTokens < boss.tokenCost) {
-                bossBtn.active = false;
-            }
-
-            this.addRenderableWidget(bossBtn);
-        }
-
-        // Token Merchant button (lower left)
-        tokenMerchantButton = Button.builder(
-                Component.literal("Token\nMerchant"),
-                btn -> openTokenMerchant()
-        ).bounds(centerX + 10, centerY + BOARD_HEIGHT - 50, 60, 40).build();
-        this.addRenderableWidget(tokenMerchantButton);
-
-        // Loot Shop button (lower right)
-        lootShopButton = Button.builder(
-                Component.literal("Loot\nShop"),
-                btn -> openLootShop()
-        ).bounds(centerX + BOARD_WIDTH - 70, centerY + BOARD_HEIGHT - 50, 60, 40).build();
-        this.addRenderableWidget(lootShopButton);
-
-        // My Hunts button (bottom center)
-        myHuntsButton = Button.builder(
+        // My Active Hunts button
+        int bottomButtonY = boardY + scaledBoardHeight - (int)(scaledBoardHeight * 0.12f);
+        this.addRenderableWidget(Button.builder(
                 Component.literal("My Active Hunts"),
                 btn -> openMyHunts()
-        ).bounds(centerX + 75, centerY + BOARD_HEIGHT - 45, 106, 20).build();
-        this.addRenderableWidget(myHuntsButton);
+        ).bounds(boardX + scaledBoardWidth / 2 - 60, bottomButtonY, 120, 20).build());
 
         // Close button
         this.addRenderableWidget(Button.builder(
                 Component.literal("Close Board"),
                 btn -> this.onClose()
-        ).bounds(centerX + 75, centerY + BOARD_HEIGHT - 20, 106, 20).build());
+        ).bounds(boardX + scaledBoardWidth / 2 - 50, bottomButtonY + 25, 100, 20).build());
+    }
+
+    private void calculateScaledDimensions() {
+        Minecraft mc = Minecraft.getInstance();
+        int guiScale = mc.options.guiScale().get();
+
+        if (guiScale == 0) {
+            guiScale = 5;
+        }
+
+        float scaleFactor = Math.max(1.0f, 5.0f / guiScale);
+        scaledBoardWidth = (int)(BASE_BOARD_WIDTH * scaleFactor);
+        scaledBoardHeight = (int)(BASE_BOARD_HEIGHT * scaleFactor);
+
+        scaledBoardWidth = Math.max(scaledBoardWidth, 280);
+        scaledBoardHeight = Math.max(scaledBoardHeight, 200);
+    }
+
+    @Override
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        // Check if clicked on Token Merchant
+        if (isPointInRadius(mouseX, mouseY, tokenMerchantX, tokenMerchantY, ENTITY_CLICK_RADIUS)) {
+            openTokenMerchant();
+            return true;
+        }
+
+        // Check if clicked on Loot Merchant
+        if (isPointInRadius(mouseX, mouseY, lootMerchantX, lootMerchantY, ENTITY_CLICK_RADIUS)) {
+            openLootShop();
+            return true;
+        }
+
+        return super.mouseClicked(mouseX, mouseY, button);
+    }
+
+    private boolean isPointInRadius(double pointX, double pointY, int targetX, int targetY, int radius) {
+        double dx = pointX - targetX;
+        double dy = pointY - targetY;
+        return (dx * dx + dy * dy) <= (radius * radius);
     }
 
     @Override
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
 
-        int centerX = (this.width - BOARD_WIDTH) / 2;
-        int centerY = (this.height - BOARD_HEIGHT) / 2;
+        // Update merchant rotations
+        tokenMerchantRotation.updateFromMouse(mouseX, mouseY, tokenMerchantX, tokenMerchantY);
+        lootMerchantRotation.updateFromMouse(mouseX, mouseY, lootMerchantX, lootMerchantY);
 
-        // Draw board background
-        graphics.fill(centerX, centerY, centerX + BOARD_WIDTH, centerY + BOARD_HEIGHT, 0xFF8B6F47);
-        graphics.fill(centerX + 4, centerY + 4, centerX + BOARD_WIDTH - 4, centerY + BOARD_HEIGHT - 4, 0xFFC9A677);
+        // Draw main board background (dark outer border)
+        graphics.fill(boardX, boardY, boardX + scaledBoardWidth, boardY + scaledBoardHeight, 0xFF2C1810);
+
+        // Draw main panel (tan)
+        graphics.fill(boardX + 4, boardY + 4, boardX + scaledBoardWidth - 4, boardY + scaledBoardHeight - 4, 0xFF8B6F47);
+
+        // Draw inner content area (lighter tan)
+        int innerMargin = (int)(scaledBoardWidth * 0.08f);
+        int innerTop = boardY + (int)(scaledBoardHeight * 0.32f);
+        graphics.fill(
+                boardX + innerMargin,
+                innerTop,
+                boardX + scaledBoardWidth - innerMargin,
+                boardY + scaledBoardHeight - innerMargin,
+                0xFFC9A677
+        );
 
         // Title
         graphics.drawCenteredString(this.font, "ASH HOLLOW BOUNTY BOARD",
-                this.width / 2, centerY + 10, 0x3A1A0A);
+                this.width / 2, boardY + 15, 0xFFFFFF);
 
-        // Section labels
-        graphics.drawString(this.font, "Standard Contracts", centerX + 10, centerY + 20, 0x3A1A0A);
-        graphics.drawString(this.font, "Legendary Contracts", centerX + 10, centerY + 110, 0x8B1A1A);
+        // Subtitle
+        graphics.drawCenteredString(this.font, "Select Bounty Category",
+                this.width / 2, boardY + 30, 0xCCCCCC);
 
-        // Player balance
-        graphics.drawString(this.font, "Coins: " + playerCoins, centerX + 10, centerY + 160, 0xFFD700);
-        graphics.drawString(this.font, "Tokens: " + playerBossTokens, centerX + 10, centerY + 170, 0xFF5AFF5A);
+        // ✅ GET LIVE PLAYER DATA
+        int playerCoins = 0;
+        int playerTokens = 0;
+        if (minecraft.player != null) {
+            playerCoins = PlayerDataAPI.getCoins(minecraft.player);
+            playerTokens = PlayerDataAPI.getTokens(minecraft.player);
+        }
+
+        // Currency display boxes (on inner panel)
+        int currencyBoxWidth = 100;
+        int currencyBoxHeight = 25;
+
+        // Coins box (bottom left of inner panel)
+        graphics.fill(
+                boardX + innerMargin + 10,
+                boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 60,
+                boardX + innerMargin + 10 + currencyBoxWidth,
+                boardY + scaledBoardHeight - innerMargin - 60,
+                0xFF5C4033
+        );
+        graphics.drawString(this.font, "Coins: " + playerCoins,
+                boardX + innerMargin + 15,
+                boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 52,
+                0xFFD700);
+
+        // Tokens box (bottom right of inner panel)
+        graphics.fill(
+                boardX + scaledBoardWidth - innerMargin - currencyBoxWidth - 10,
+                boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 60,
+                boardX + scaledBoardWidth - innerMargin - 10,
+                boardY + scaledBoardHeight - innerMargin - 60,
+                0xFF5C4033
+        );
+        graphics.drawString(this.font, "Tokens: " + playerTokens,
+                boardX + scaledBoardWidth - innerMargin - currencyBoxWidth - 5,
+                boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 52,
+                0xFF5AFF5A);
+
+        // ✅ Render merchants OUTSIDE board (no background boxes)
+        int merchantScale = (int)(25 * (scaledBoardWidth / (float)BASE_BOARD_WIDTH));
+        MerchantGuiRenderer.renderMerchant(graphics, tokenMerchantX, tokenMerchantY, merchantScale, tokenMerchantRotation, true);
+        MerchantGuiRenderer.renderMerchant(graphics, lootMerchantX, lootMerchantY, merchantScale, lootMerchantRotation, false);
+
+        // Draw hover labels for merchants
+        if (isPointInRadius(mouseX, mouseY, tokenMerchantX, tokenMerchantY, ENTITY_CLICK_RADIUS)) {
+            graphics.drawCenteredString(this.font, "Token Merchant",
+                    tokenMerchantX, tokenMerchantY - 60, 0xFFFFFF);
+        }
+
+        if (isPointInRadius(mouseX, mouseY, lootMerchantX, lootMerchantY, ENTITY_CLICK_RADIUS)) {
+            graphics.drawCenteredString(this.font, "Loot Shop",
+                    lootMerchantX, lootMerchantY - 60, 0xFFFFFF);
+        }
 
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
-    private void openBountyDetails(Bounty bounty) {
-        minecraft.setScreen(new BountyDetailsScreen(this, bounty, playerCoins, playerBossTokens));
-    }
+    private void openBountyViewer(BountyCategory category) {
+        // ✅ Pass live player data to viewer
+        List<Bounty> bounties = categoryBounties.get(category);
+        int coins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
+        int tokens = minecraft.player != null ? PlayerDataAPI.getTokens(minecraft.player) : 0;
 
-    private void openBossBountyDetails(BossBounty boss) {
-        minecraft.setScreen(new BossBountyDetailsScreen(this, boss, playerCoins, playerBossTokens));
+        minecraft.setScreen(new BountyViewerScreen(this, category, bounties, coins, tokens));
     }
 
     private void openTokenMerchant() {
-        minecraft.setScreen(new TokenMerchantScreen(this, playerCoins, playerBossTokens));
+        int coins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
+        int tokens = minecraft.player != null ? PlayerDataAPI.getTokens(minecraft.player) : 0;
+        minecraft.setScreen(new TokenMerchantScreen(this, coins, tokens));
     }
 
     private void openLootShop() {
-        minecraft.setScreen(new LootShopScreen(this, playerCoins));
+        int coins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
+        minecraft.setScreen(new LootShopScreen(this, coins));
     }
 
     private void openMyHunts() {
-        minecraft.setScreen(new ActiveHuntsScreen(this));
+        if (minecraft.player != null) {
+            List<Bounty> activeBounties = BountyManager.getPlayerBounties(
+                    minecraft.player.getUUID()
+            );
+            minecraft.setScreen(new ActiveHuntsScreen(this, activeBounties));
+        }
     }
 
     @Override
     public boolean isPauseScreen() {
         return true;
-    }
-}
-
-// ========================================
-// Bounty.java - Data class for normal bounties
-// ========================================
-class Bounty {
-    public String name;
-    public int threatLevel; // 1-5 stars
-    public String location;
-    public int coinReward;
-    public int tokenReward;
-    public String description;
-    public List<String> objectives;
-
-    public Bounty(String name, int threatLevel, String location, int coinReward, int tokenReward) {
-        this.name = name;
-        this.threatLevel = threatLevel;
-        this.location = location;
-        this.coinReward = coinReward;
-        this.tokenReward = tokenReward;
-        this.description = "A dangerous enemy terrorizing " + location + ".";
-        this.objectives = new ArrayList<>();
-        this.objectives.add("Eliminate Target (0/1)");
-        this.objectives.add("Collect Evidence (0/1)");
-        this.objectives.add("Return within 3 days");
-    }
-
-    public String getStars() {
-        return "*".repeat(threatLevel);
-    }
-}
-
-// ========================================
-// BossBounty.java - Data class for boss bounties
-// ========================================
-class BossBounty {
-    public String name;
-    public int threatLevel; // 1-5 stars
-    public int tokenCost;
-    public int coinReward;
-    public boolean isLocked;
-    public String description;
-    public List<String> mechanics;
-
-    public BossBounty(String name, int threatLevel, int tokenCost, int coinReward, boolean isLocked) {
-        this.name = name;
-        this.threatLevel = threatLevel;
-        this.tokenCost = tokenCost;
-        this.coinReward = coinReward;
-        this.isLocked = isLocked;
-        this.description = "An ancient legendary threat. Extreme danger.";
-        this.mechanics = new ArrayList<>();
-        this.mechanics.add("Phase 1: Summons minions");
-        this.mechanics.add("Phase 2: Area damage");
-        this.mechanics.add("Phase 3: Enrage mode");
-    }
-
-    public String getStars() {
-        return "*".repeat(threatLevel);
-    }
-}
-
-// ========================================
-// BountyDetailsScreen.java
-// ========================================
-class BountyDetailsScreen extends Screen {
-    private final Screen parent;
-    private final Bounty bounty;
-    private final int playerCoins;
-    private final int playerTokens;
-
-    protected BountyDetailsScreen(Screen parent, Bounty bounty, int coins, int tokens) {
-        super(Component.literal("Bounty Details"));
-        this.parent = parent;
-        this.bounty = bounty;
-        this.playerCoins = coins;
-        this.playerTokens = tokens;
-    }
-
-    @Override
-    protected void init() {
-        int centerX = this.width / 2;
-        int centerY = this.height / 2;
-
-        // Accept button
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Accept Contract"),
-                btn -> acceptBounty()
-        ).bounds(centerX - 110, centerY + 80, 100, 20).build());
-
-        // Back button
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Back"),
-                btn -> minecraft.setScreen(parent)
-        ).bounds(centerX + 10, centerY + 80, 100, 20).build());
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-
-        int centerX = this.width / 2;
-        int centerY = this.height / 2 - 80;
-
-        // Poster background
-        graphics.fill(centerX - 120, centerY, centerX + 120, centerY + 200, 0xFF8B6F47);
-        graphics.fill(centerX - 116, centerY + 4, centerX + 116, centerY + 196, 0xFFC9A677);
-
-        // Title
-        graphics.drawCenteredString(this.font, "WANTED", centerX, centerY + 10, 0x8B1A1A);
-        graphics.drawCenteredString(this.font, "DEAD OR ALIVE", centerX, centerY + 20, 0x3A1A0A);
-
-        // Portrait placeholder
-        graphics.fill(centerX - 40, centerY + 35, centerX + 40, centerY + 115, 0xFF2A2A2A);
-
-        // Details
-        int yOffset = centerY + 125;
-        graphics.drawCenteredString(this.font, "Target: " + bounty.name, centerX, yOffset, 0x3A1A0A);
-        graphics.drawCenteredString(this.font, "Threat: " + bounty.getStars(), centerX, yOffset + 10, 0xFFD700);
-        graphics.drawCenteredString(this.font, "Location: " + bounty.location, centerX, yOffset + 20, 0x3A1A0A);
-
-        // Rewards
-        graphics.drawCenteredString(this.font, "Rewards:", centerX, yOffset + 35, 0x8B1A1A);
-        graphics.drawCenteredString(this.font, bounty.coinReward + " Coins + " + bounty.tokenReward + " Tokens",
-                centerX, yOffset + 45, 0x3A1A0A);
-
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    private void acceptBounty() {
-        // TODO: Send packet to server to accept bounty
-        minecraft.player.sendSystemMessage(Component.literal("Bounty Accepted: " + bounty.name));
-        minecraft.setScreen(parent);
-    }
-}
-
-// ========================================
-// BossBountyDetailsScreen.java
-// ========================================
-class BossBountyDetailsScreen extends Screen {
-    private final Screen parent;
-    private final BossBounty boss;
-    private final int playerCoins;
-    private final int playerTokens;
-
-    protected BossBountyDetailsScreen(Screen parent, BossBounty boss, int coins, int tokens) {
-        super(Component.literal("Boss Bounty Details"));
-        this.parent = parent;
-        this.boss = boss;
-        this.playerCoins = coins;
-        this.playerTokens = tokens;
-    }
-
-    @Override
-    protected void init() {
-        int centerX = this.width / 2;
-        int centerY = this.height / 2;
-
-        boolean canAfford = playerTokens >= boss.tokenCost;
-
-        // Purchase button
-        Button purchaseBtn = Button.builder(
-                Component.literal("Purchase (" + boss.tokenCost + " Tokens)"),
-                btn -> purchaseBounty()
-        ).bounds(centerX - 110, centerY + 80, 100, 20).build();
-        purchaseBtn.active = canAfford;
-        this.addRenderableWidget(purchaseBtn);
-
-        // Back button
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Back"),
-                btn -> minecraft.setScreen(parent)
-        ).bounds(centerX + 10, centerY + 80, 100, 20).build());
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-
-        int centerX = this.width / 2;
-        int centerY = this.height / 2 - 80;
-
-        // Legendary poster background
-        graphics.fill(centerX - 120, centerY, centerX + 120, centerY + 200, 0xFF4A1A4A);
-        graphics.fill(centerX - 116, centerY + 4, centerX + 116, centerY + 196, 0xFF8B1AAA);
-
-        // Title
-        graphics.drawCenteredString(this.font, "LEGENDARY BOUNTY", centerX, centerY + 10, 0xFFD700);
-        graphics.drawCenteredString(this.font, boss.name, centerX, centerY + 22, 0xFFFFFF);
-
-        // Portrait placeholder (animated skull)
-        graphics.fill(centerX - 40, centerY + 35, centerX + 40, centerY + 115, 0xFF1A1A1A);
-
-        // Details
-        int yOffset = centerY + 125;
-        graphics.drawCenteredString(this.font, "Threat: " + boss.getStars() + " EXTREME", centerX, yOffset, 0xFFFF5A5A);
-        graphics.drawCenteredString(this.font, "Cost: " + boss.tokenCost + " Boss Tokens", centerX, yOffset + 10, 0xFF5AFF5A);
-
-        // Lock status
-        if (playerTokens < boss.tokenCost) {
-            graphics.drawCenteredString(this.font, "LOCKED - Need " + (boss.tokenCost - playerTokens) + " more tokens",
-                    centerX, yOffset + 25, 0xFFFF5A5A);
-        }
-
-        // Rewards
-        graphics.drawCenteredString(this.font, "Rewards:", centerX, yOffset + 40, 0xFFD700);
-        graphics.drawCenteredString(this.font, boss.coinReward + " Coins + Legendary Loot",
-                centerX, yOffset + 50, 0xFFFFFF);
-
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    private void purchaseBounty() {
-        if (playerTokens >= boss.tokenCost) {
-            // TODO: Send packet to server to purchase and accept boss bounty
-            minecraft.player.sendSystemMessage(Component.literal("Boss Bounty Purchased: " + boss.name));
-            minecraft.setScreen(parent);
-        }
-    }
-}
-
-// ========================================
-// TokenMerchantScreen.java
-// ========================================
-class TokenMerchantScreen extends Screen {
-    private final Screen parent;
-    private int playerCoins;
-    private int playerTokens;
-
-    protected TokenMerchantScreen(Screen parent, int coins, int tokens) {
-        super(Component.literal("Token Merchant"));
-        this.parent = parent;
-        this.playerCoins = coins;
-        this.playerTokens = tokens;
-    }
-
-    @Override
-    protected void init() {
-        int centerX = this.width / 2;
-        int startY = this.height / 4 + 40;
-
-        // Exchange buttons
-        this.addRenderableWidget(Button.builder(
-                Component.literal("100 Coins -> 1 Token"),
-                btn -> exchange(100, 1)
-        ).bounds(centerX - 100, startY, 200, 20).build());
-
-        this.addRenderableWidget(Button.builder(
-                Component.literal("500 Coins -> 6 Tokens (BONUS!)"),
-                btn -> exchange(500, 6)
-        ).bounds(centerX - 100, startY + 25, 200, 20).build());
-
-        this.addRenderableWidget(Button.builder(
-                Component.literal("1000 Coins -> 15 Tokens (BONUS!)"),
-                btn -> exchange(1000, 15)
-        ).bounds(centerX - 100, startY + 50, 200, 20).build());
-
-        // Back button
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Back to Board"),
-                btn -> minecraft.setScreen(parent)
-        ).bounds(centerX - 60, startY + 90, 120, 20).build());
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-
-        graphics.drawCenteredString(this.font, "Token Merchant", this.width / 2, 20, 0xFFFFFF);
-        graphics.drawCenteredString(this.font, "Coins: " + playerCoins, this.width / 2, 40, 0xFFD700);
-        graphics.drawCenteredString(this.font, "Boss Tokens: " + playerTokens, this.width / 2, 50, 0xFF5AFF5A);
-
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    private void exchange(int coinCost, int tokensGained) {
-        if (playerCoins >= coinCost) {
-            // TODO: Send packet to server to exchange
-            playerCoins -= coinCost;
-            playerTokens += tokensGained;
-            minecraft.player.sendSystemMessage(Component.literal("Exchanged " + coinCost + " coins for " + tokensGained + " tokens!"));
-        } else {
-            minecraft.player.sendSystemMessage(Component.literal("Not enough coins!"));
-        }
-    }
-}
-
-// ========================================
-// LootShopScreen.java
-// ========================================
-class LootShopScreen extends Screen {
-    private final Screen parent;
-    private int playerCoins;
-
-    protected LootShopScreen(Screen parent, int coins) {
-        super(Component.literal("Loot Shop"));
-        this.parent = parent;
-        this.playerCoins = coins;
-    }
-
-    @Override
-    protected void init() {
-        int centerX = this.width / 2;
-        int startY = this.height / 4 + 40;
-
-        // Sample items
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Iron Harpoon - 75 Coins"),
-                btn -> buyItem("Iron Harpoon", 75)
-        ).bounds(centerX - 100, startY, 200, 20).build());
-
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Steel Harpoon - 200 Coins"),
-                btn -> buyItem("Steel Harpoon", 200)
-        ).bounds(centerX - 100, startY + 25, 200, 20).build());
-
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Health Potion - 10 Coins"),
-                btn -> buyItem("Health Potion", 10)
-        ).bounds(centerX - 100, startY + 50, 200, 20).build());
-
-        // Back button
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Back to Board"),
-                btn -> minecraft.setScreen(parent)
-        ).bounds(centerX - 60, startY + 90, 120, 20).build());
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-
-        graphics.drawCenteredString(this.font, "Loot Shop", this.width / 2, 20, 0xFFFFFF);
-        graphics.drawCenteredString(this.font, "Your Coins: " + playerCoins, this.width / 2, 40, 0xFFD700);
-
-        super.render(graphics, mouseX, mouseY, partialTick);
-    }
-
-    private void buyItem(String itemName, int cost) {
-        if (playerCoins >= cost) {
-            // TODO: Send packet to server to purchase item
-            playerCoins -= cost;
-            minecraft.player.sendSystemMessage(Component.literal("Purchased " + itemName + "!"));
-        } else {
-            minecraft.player.sendSystemMessage(Component.literal("Not enough coins!"));
-        }
-    }
-}
-
-// ========================================
-// ActiveHuntsScreen.java
-// ========================================
-class ActiveHuntsScreen extends Screen {
-    private final Screen parent;
-
-    protected ActiveHuntsScreen(Screen parent) {
-        super(Component.literal("Active Hunts"));
-        this.parent = parent;
-    }
-
-    @Override
-    protected void init() {
-        int centerX = this.width / 2;
-
-        this.addRenderableWidget(Button.builder(
-                Component.literal("Back to Board"),
-                btn -> minecraft.setScreen(parent)
-        ).bounds(centerX - 60, this.height - 40, 120, 20).build());
-    }
-
-    @Override
-    public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
-        this.renderBackground(graphics);
-
-        graphics.drawCenteredString(this.font, "My Active Hunts", this.width / 2, 20, 0xFFFFFF);
-        graphics.drawCenteredString(this.font, "No active bounties", this.width / 2, 60, 0xAAAAAA);
-        graphics.drawCenteredString(this.font, "(This will show your accepted contracts)", this.width / 2, 75, 0x888888);
-
-        super.render(graphics, mouseX, mouseY, partialTick);
     }
 }

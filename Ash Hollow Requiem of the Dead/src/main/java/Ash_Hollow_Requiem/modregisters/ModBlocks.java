@@ -1,5 +1,6 @@
-package Ash_Hollow_Requiem;
+package Ash_Hollow_Requiem.modregisters;
 
+import Ash_Hollow_Requiem.Ash_Hollow;
 import Ash_Hollow_Requiem.bountyboard.BountyBoardBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.DeferredRegister;

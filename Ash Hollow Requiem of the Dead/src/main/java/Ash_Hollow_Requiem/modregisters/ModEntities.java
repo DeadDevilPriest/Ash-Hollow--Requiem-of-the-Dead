@@ -1,6 +1,7 @@
-package Ash_Hollow_Requiem;
+package Ash_Hollow_Requiem.modregisters;
 
 
+import Ash_Hollow_Requiem.Ash_Hollow;
 import Ash_Hollow_Requiem.harpoon.entity.HarpoonEntity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;

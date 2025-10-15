@@ -1,0 +1,11 @@
+{
+  "parent": "animation.entity.default",
+  "animations": {
+    "animation.loot_merchant.idle": {
+      "animation_length": 1,
+      "loop": true,
+      "bones": {
+      }
+    }
+  }
+}

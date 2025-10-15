@@ -1,0 +1,12 @@
+{
+  "parent": "animation.entity.default",
+  "animations": {
+    "animation.token_merchant.idle": {
+      "animation_length": 1,
+      "loop": true,
+      "bones": {
+
+      }
+    }
+  }
+}
