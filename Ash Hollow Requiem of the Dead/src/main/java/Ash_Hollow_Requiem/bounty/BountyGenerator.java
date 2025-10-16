@@ -17,21 +17,17 @@ public class BountyGenerator {
     private static final long LEGENDARY_DURATION = 20 * 60 * 480; // 8 hours
 
     /**
-     * Generates a random standard bounty
+     * Generates a random standard bounty (NO TOKEN COST)
      */
     public static Bounty generateStandardBounty(BountyRarity rarity, long currentTime) {
-        // Get the appropriate mob pool
         List<EntityType<?>> mobPool = BountyPools.getPoolForRarity(rarity);
 
-        // Determine number of different mob types
         int targetCount = RANDOM.nextInt(
                 rarity.getMaxTargets() - rarity.getMinTargets() + 1
         ) + rarity.getMinTargets();
 
-        // Shuffle and select mobs
         List<EntityType<?>> selectedMobs = shuffleAndSelect(mobPool, targetCount);
 
-        // Create targets with kill requirements
         List<BountyTarget> targets = new ArrayList<>();
         int totalKills = 0;
 
@@ -43,18 +39,22 @@ public class BountyGenerator {
 
         long duration = getDurationForRarity(rarity);
 
+        // ✅ Standard bounties have NO token cost
         return new Bounty(
                 UUID.randomUUID(),
                 rarity,
                 BountyType.STANDARD,
                 targets,
                 totalKills,
-                currentTime + duration
+                currentTime + duration,
+                rarity.getBaseReward(),
+                rarity.getBaseReward() / 5,
+                0 // No token cost
         );
     }
 
     /**
-     * Generates a boss bounty (single powerful enemy)
+     * ✅ Generates a BOSS bounty with token cost (Epic to Unknown only)
      */
     public static Bounty generateBossBounty(BountyRarity rarity, long currentTime) {
         List<EntityType<?>> bossPool = BountyPools.BOSS_MOBS;
@@ -76,31 +76,55 @@ public class BountyGenerator {
 
         long duration = getDurationForRarity(rarity) * 2; // Bosses get double time
 
+        // ✅ ONLY BOSS bounties have token cost (5-100 tokens)
+        int tokenCost = calculateTokenCost(rarity);
+
         return new Bounty(
                 UUID.randomUUID(),
                 rarity,
                 BountyType.BOSS,
                 targets,
                 totalKills,
-                currentTime + duration
+                currentTime + duration,
+                rarity.getBaseReward() * 2, // Double coin reward for bosses
+                rarity.getBaseReward() / 3, // XP reward
+                tokenCost // ✅ Token cost ONLY for boss bounties
         );
     }
 
     /**
-     * Generates a horde bounty (many kills of common mobs)
+     * ✅ Calculate token cost for BOSS bounties (5-100 tokens)
+     * Epic to Unknown rarities only
+     */
+    private static int calculateTokenCost(BountyRarity rarity) {
+        return switch (rarity) {
+            // Epic to Unknown (boss bounties only)
+            case EPIC -> 5 + RANDOM.nextInt(6);         // 5-10 tokens
+            case LEGENDARY -> 10 + RANDOM.nextInt(11);  // 10-20 tokens
+            case ANCIENT -> 20 + RANDOM.nextInt(11);    // 20-30 tokens
+            case CURSED -> 30 + RANDOM.nextInt(11);     // 30-40 tokens
+            case EXPERIMENTAL -> 40 + RANDOM.nextInt(11); // 40-50 tokens
+            case HOLLOW -> 50 + RANDOM.nextInt(16);     // 50-65 tokens
+            case GODLY -> 65 + RANDOM.nextInt(16);      // 65-80 tokens
+            case INSANE -> 80 + RANDOM.nextInt(16);     // 80-95 tokens
+            case UNKNOWN -> 95 + RANDOM.nextInt(6);     // 95-100 tokens
+
+            default -> 0; // Lower rarities shouldn't have boss bounties
+        };
+    }
+
+    /**
+     * Generates a horde bounty (NO TOKEN COST)
      */
     public static Bounty generateHordeBounty(BountyRarity rarity, long currentTime) {
         List<EntityType<?>> mobPool = BountyPools.COMMON_HOSTILES;
 
-        // Horde bounties have 1-2 mob types with high kill counts
-        List<EntityType<?>> selectedMobs = shuffleAndSelect(mobPool,
-                RANDOM.nextInt(2) + 1);
+        List<EntityType<?>> selectedMobs = shuffleAndSelect(mobPool, RANDOM.nextInt(2) + 1);
 
         List<BountyTarget> targets = new ArrayList<>();
         int totalKills = 0;
 
         for (EntityType<?> mobType : selectedMobs) {
-            // Horde bounties require many kills
             int killsRequired = calculateHordeKillRequirement(rarity);
             targets.add(new BountyTarget(mobType, killsRequired, false));
             totalKills += killsRequired;
@@ -108,18 +132,22 @@ public class BountyGenerator {
 
         long duration = getDurationForRarity(rarity);
 
+        // ✅ Horde bounties have NO token cost
         return new Bounty(
                 UUID.randomUUID(),
                 rarity,
                 BountyType.HORDE,
                 targets,
                 totalKills,
-                currentTime + duration
+                currentTime + duration,
+                rarity.getBaseReward(),
+                rarity.getBaseReward() / 5,
+                0 // No token cost
         );
     }
 
     /**
-     * Generates an elite bounty (tough enemies)
+     * Generates an elite bounty (NO TOKEN COST)
      */
     public static Bounty generateEliteBounty(BountyRarity rarity, long currentTime) {
         List<EntityType<?>> elitePool = BountyPools.ELITE_MOBS;
@@ -141,35 +169,30 @@ public class BountyGenerator {
 
         long duration = (long) (getDurationForRarity(rarity) * 1.5f);
 
+        // ✅ Elite bounties have NO token cost
         return new Bounty(
                 UUID.randomUUID(),
                 rarity,
                 BountyType.ELITE,
                 targets,
                 totalKills,
-                (long)(currentTime + duration)
+                (long)(currentTime + duration),
+                rarity.getBaseReward(),
+                rarity.getBaseReward() / 5,
+                0 // No token cost
         );
     }
 
-    /**
-     * Shuffles a list and returns a random selection
-     * This is the core randomization function
-     */
+    // ... rest of helper methods stay the same ...
+
     private static <T> List<T> shuffleAndSelect(List<T> source, int count) {
         if (source.isEmpty()) return new ArrayList<>();
-
-        // Create a copy to avoid modifying the original
         List<T> shuffled = new ArrayList<>(source);
         Collections.shuffle(shuffled, RANDOM);
-
-        // Take only the requested number of items
         count = Math.min(count, shuffled.size());
         return new ArrayList<>(shuffled.subList(0, count));
     }
 
-    /**
-     * Calculates kill requirement based on rarity
-     */
     private static int calculateKillRequirement(BountyRarity rarity) {
         int base = switch (rarity) {
             case COMMON -> 5;
@@ -177,24 +200,16 @@ public class BountyGenerator {
             case RARE -> 12;
             case EPIC -> 20;
             case LEGENDARY -> 30;
-            default -> 15; // For other rarities
+            default -> 15;
         };
-
-        // Add some randomness (±20%)
         int variance = base / 5;
         return base + RANDOM.nextInt(variance * 2 + 1) - variance;
     }
 
-    /**
-     * Calculates kill requirement for horde bounties (higher numbers)
-     */
     private static int calculateHordeKillRequirement(BountyRarity rarity) {
         return calculateKillRequirement(rarity) * 3;
     }
 
-    /**
-     * Gets the duration for a bounty based on rarity
-     */
     private static long getDurationForRarity(BountyRarity rarity) {
         return switch (rarity) {
             case COMMON -> COMMON_DURATION;
@@ -202,18 +217,12 @@ public class BountyGenerator {
             case RARE -> RARE_DURATION;
             case EPIC -> EPIC_DURATION;
             case LEGENDARY -> LEGENDARY_DURATION;
-            default -> RARE_DURATION; // Default for other rarities
+            default -> RARE_DURATION;
         };
     }
 
-    /**
-     * Generates a completely random bounty
-     */
     public static Bounty generateRandomBounty(long currentTime) {
-        // Random rarity with weighted chances
         BountyRarity rarity = getRandomRarity();
-
-        // Random type (but bosses are rarer)
         BountyType type = getRandomType(rarity);
 
         return switch (type) {
@@ -224,12 +233,8 @@ public class BountyGenerator {
         };
     }
 
-    /**
-     * Gets a weighted random rarity
-     */
     private static BountyRarity getRandomRarity() {
         int roll = RANDOM.nextInt(100);
-
         if (roll < 40) return BountyRarity.COMMON;
         if (roll < 70) return BountyRarity.UNCOMMON;
         if (roll < 88) return BountyRarity.RARE;
@@ -237,11 +242,7 @@ public class BountyGenerator {
         return BountyRarity.LEGENDARY;
     }
 
-    /**
-     * Gets a weighted random bounty type based on rarity
-     */
     private static BountyType getRandomType(BountyRarity rarity) {
-        // Boss bounties only appear at higher rarities
         if (rarity.ordinal() < BountyRarity.RARE.ordinal()) {
             int roll = RANDOM.nextInt(100);
             if (roll < 60) return BountyType.STANDARD;

@@ -1,6 +1,6 @@
 package Ash_Hollow_Requiem;
 
-import Ash_Hollow_Requiem.harpoon.entity.HarpoonEntity;
+import Ash_Hollow_Requiem.items.harpoon.entity.HarpoonEntity;
 import Ash_Hollow_Requiem.modregisters.ModEntities;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;

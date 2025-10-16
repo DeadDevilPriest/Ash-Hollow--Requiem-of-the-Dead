@@ -25,7 +25,7 @@ public class BountyBoardScreen extends Screen {
     private static final int BASE_BOARD_HEIGHT = 200;
     private static final int ENTITY_CLICK_RADIUS = 50;
 
-    // Bounty categories
+    // ✅ Bounty categories (keeping this in BountyBoardScreen for UI)
     public enum BountyCategory {
         BOUNTY("Bounty", ChatFormatting.GREEN),
         SPECIAL("Special", ChatFormatting.BLUE),
@@ -46,8 +46,9 @@ public class BountyBoardScreen extends Screen {
         public ChatFormatting getColor() { return color; }
     }
 
-    // Store 8 bounties per category
+    // Store 8 bounties per category (received from server)
     private Map<BountyCategory, List<Bounty>> categoryBounties = new HashMap<>();
+    private boolean bountiesLoaded = false;
 
     // Merchant rendering data
     private MerchantRotation tokenMerchantRotation;
@@ -71,46 +72,19 @@ public class BountyBoardScreen extends Screen {
         super(Component.literal("Bounty Board"));
         this.tokenMerchantRotation = new MerchantRotation();
         this.lootMerchantRotation = new MerchantRotation();
-        loadBounties();
-    }
 
-    private void loadBounties() {
-        // Load 8 bounties for each category
+        // Initialize empty bounty lists (will be loaded from server)
         for (BountyCategory category : BountyCategory.values()) {
-            List<Bounty> bounties = new ArrayList<>();
-            long currentTime = Minecraft.getInstance().player.level().getGameTime();
-
-            for (int i = 0; i < 8; i++) {
-                bounties.add(BountyGenerator.generateStandardBounty(
-                        getRandomRarityForCategory(category), currentTime
-                ));
-            }
-
-            categoryBounties.put(category, bounties);
+            categoryBounties.put(category, new ArrayList<>());
         }
     }
 
-    private BountyRarity getRandomRarityForCategory(BountyCategory category) {
-        int roll = new java.util.Random().nextInt(100);
-
-        return switch (category) {
-            case BOSS, EVENT -> {
-                if (roll < 30) yield BountyRarity.EPIC;
-                if (roll < 70) yield BountyRarity.LEGENDARY;
-                yield BountyRarity.EPIC;
-            }
-            case ELITE -> {
-                if (roll < 40) yield BountyRarity.RARE;
-                if (roll < 80) yield BountyRarity.EPIC;
-                yield BountyRarity.LEGENDARY;
-            }
-            default -> {
-                if (roll < 40) yield BountyRarity.COMMON;
-                if (roll < 70) yield BountyRarity.UNCOMMON;
-                if (roll < 90) yield BountyRarity.RARE;
-                yield BountyRarity.EPIC;
-            }
-        };
+    /**
+     * Called by packet handler when bounties are received from server
+     */
+    public void setBountiesForCategory(BountyCategory category, List<Bounty> bounties) {
+        categoryBounties.put(category, bounties);
+        bountiesLoaded = true;
     }
 
     @Override
@@ -124,9 +98,9 @@ public class BountyBoardScreen extends Screen {
 
         // Position merchants OUTSIDE the board (left and right)
         int merchantSize = (int)(scaledBoardWidth * 0.15f);
-        tokenMerchantX = boardX - merchantSize - 20; // LEFT of board
+        tokenMerchantX = boardX - merchantSize - 20;
         tokenMerchantY = boardY + scaledBoardHeight / 2;
-        lootMerchantX = boardX + scaledBoardWidth + merchantSize + 20; // RIGHT of board
+        lootMerchantX = boardX + scaledBoardWidth + merchantSize + 20;
         lootMerchantY = boardY + scaledBoardHeight / 2;
 
         // Create 6 category buttons (top row)
@@ -163,6 +137,94 @@ public class BountyBoardScreen extends Screen {
                 Component.literal("Close Board"),
                 btn -> this.onClose()
         ).bounds(boardX + scaledBoardWidth / 2 - 50, bottomButtonY + 25, 100, 20).build());
+
+        // ✅ Request bounties from server for all categories
+        requestBountiesFromServer();
+    }
+
+    /**
+     * Request persistent bounties from server
+     */
+    private void requestBountiesFromServer() {
+        for (BountyCategory category : BountyCategory.values()) {
+            // TODO: Send packet to server requesting bounties for this category
+            // PacketHandler.sendToServer(new RequestBountiesPacket(category));
+
+            // TEMPORARY: Generate client-side until packet is implemented
+            loadTemporaryBounties(category);
+        }
+    }
+
+    /**
+     * TEMPORARY: Load bounties client-side (remove when server sync is ready)
+     */
+    private void loadTemporaryBounties(BountyCategory category) {
+        List<Bounty> bounties = new ArrayList<>();
+        long currentTime = Minecraft.getInstance().player.level().getGameTime();
+
+        for (int i = 0; i < 8; i++) {
+            BountyRarity rarity = getRandomRarityForCategory(category);
+
+            // Generate based on category type
+            Bounty bounty = switch(category) {
+                case BOUNTY -> BountyGenerator.generateStandardBounty(rarity, currentTime);
+                case SPECIAL -> BountyGenerator.generateStandardBounty(rarity, currentTime);
+                case HORDE -> BountyGenerator.generateHordeBounty(rarity, currentTime);
+                case ELITE -> BountyGenerator.generateEliteBounty(rarity, currentTime);
+                case BOSS -> {
+                    // ✅ BOSS category: Epic+ with TOKEN COST
+                    BountyRarity bossRarity = getRandomBossRarity();
+                    yield BountyGenerator.generateBossBounty(bossRarity, currentTime);
+                }
+                case EVENT -> BountyGenerator.generateStandardBounty(rarity, currentTime);
+            };
+
+            bounties.add(bounty);
+        }
+
+        categoryBounties.put(category, bounties);
+        bountiesLoaded = true;
+    }
+
+    private BountyRarity getRandomRarityForCategory(BountyCategory category) {
+        int roll = new java.util.Random().nextInt(100);
+
+        return switch (category) {
+            case BOSS, EVENT -> {
+                if (roll < 30) yield BountyRarity.EPIC;
+                if (roll < 70) yield BountyRarity.LEGENDARY;
+                yield BountyRarity.EPIC;
+            }
+            case ELITE -> {
+                if (roll < 40) yield BountyRarity.RARE;
+                if (roll < 80) yield BountyRarity.EPIC;
+                yield BountyRarity.LEGENDARY;
+            }
+            default -> {
+                if (roll < 40) yield BountyRarity.COMMON;
+                if (roll < 70) yield BountyRarity.UNCOMMON;
+                if (roll < 90) yield BountyRarity.RARE;
+                yield BountyRarity.EPIC;
+            }
+        };
+    }
+
+    /**
+     * Get random boss rarity (Epic to Unknown)
+     */
+    private BountyRarity getRandomBossRarity() {
+        java.util.Random random = new java.util.Random();
+        int roll = random.nextInt(100);
+
+        if (roll < 30) return BountyRarity.EPIC;
+        if (roll < 55) return BountyRarity.LEGENDARY;
+        if (roll < 75) return BountyRarity.ANCIENT;
+        if (roll < 87) return BountyRarity.CURSED;
+        if (roll < 93) return BountyRarity.EXPERIMENTAL;
+        if (roll < 96) return BountyRarity.HOLLOW;
+        if (roll < 98) return BountyRarity.GODLY;
+        if (roll < 99) return BountyRarity.INSANE;
+        return BountyRarity.UNKNOWN;
     }
 
     private void calculateScaledDimensions() {
@@ -183,13 +245,11 @@ public class BountyBoardScreen extends Screen {
 
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Check if clicked on Token Merchant
         if (isPointInRadius(mouseX, mouseY, tokenMerchantX, tokenMerchantY, ENTITY_CLICK_RADIUS)) {
             openTokenMerchant();
             return true;
         }
 
-        // Check if clicked on Loot Merchant
         if (isPointInRadius(mouseX, mouseY, lootMerchantX, lootMerchantY, ENTITY_CLICK_RADIUS)) {
             openLootShop();
             return true;
@@ -208,17 +268,12 @@ public class BountyBoardScreen extends Screen {
     public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(graphics);
 
-        // Update merchant rotations
         tokenMerchantRotation.updateFromMouse(mouseX, mouseY, tokenMerchantX, tokenMerchantY);
         lootMerchantRotation.updateFromMouse(mouseX, mouseY, lootMerchantX, lootMerchantY);
 
-        // Draw main board background (dark outer border)
         graphics.fill(boardX, boardY, boardX + scaledBoardWidth, boardY + scaledBoardHeight, 0xFF2C1810);
-
-        // Draw main panel (tan)
         graphics.fill(boardX + 4, boardY + 4, boardX + scaledBoardWidth - 4, boardY + scaledBoardHeight - 4, 0xFF8B6F47);
 
-        // Draw inner content area (lighter tan)
         int innerMargin = (int)(scaledBoardWidth * 0.08f);
         int innerTop = boardY + (int)(scaledBoardHeight * 0.32f);
         graphics.fill(
@@ -229,15 +284,13 @@ public class BountyBoardScreen extends Screen {
                 0xFFC9A677
         );
 
-        // Title
         graphics.drawCenteredString(this.font, "ASH HOLLOW BOUNTY BOARD",
                 this.width / 2, boardY + 15, 0xFFFFFF);
 
-        // Subtitle
         graphics.drawCenteredString(this.font, "Select Bounty Category",
                 this.width / 2, boardY + 30, 0xCCCCCC);
 
-        // ✅ GET LIVE PLAYER DATA
+        // GET LIVE PLAYER DATA
         int playerCoins = 0;
         int playerTokens = 0;
         if (minecraft.player != null) {
@@ -245,11 +298,10 @@ public class BountyBoardScreen extends Screen {
             playerTokens = PlayerDataAPI.getTokens(minecraft.player);
         }
 
-        // Currency display boxes (on inner panel)
+        // Currency display boxes
         int currencyBoxWidth = 100;
         int currencyBoxHeight = 25;
 
-        // Coins box (bottom left of inner panel)
         graphics.fill(
                 boardX + innerMargin + 10,
                 boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 60,
@@ -262,7 +314,6 @@ public class BountyBoardScreen extends Screen {
                 boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 52,
                 0xFFD700);
 
-        // Tokens box (bottom right of inner panel)
         graphics.fill(
                 boardX + scaledBoardWidth - innerMargin - currencyBoxWidth - 10,
                 boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 60,
@@ -275,12 +326,10 @@ public class BountyBoardScreen extends Screen {
                 boardY + scaledBoardHeight - innerMargin - currencyBoxHeight - 52,
                 0xFF5AFF5A);
 
-        // ✅ Render merchants OUTSIDE board (no background boxes)
         int merchantScale = (int)(25 * (scaledBoardWidth / (float)BASE_BOARD_WIDTH));
         MerchantGuiRenderer.renderMerchant(graphics, tokenMerchantX, tokenMerchantY, merchantScale, tokenMerchantRotation, true);
         MerchantGuiRenderer.renderMerchant(graphics, lootMerchantX, lootMerchantY, merchantScale, lootMerchantRotation, false);
 
-        // Draw hover labels for merchants
         if (isPointInRadius(mouseX, mouseY, tokenMerchantX, tokenMerchantY, ENTITY_CLICK_RADIUS)) {
             graphics.drawCenteredString(this.font, "Token Merchant",
                     tokenMerchantX, tokenMerchantY - 60, 0xFFFFFF);
@@ -295,7 +344,6 @@ public class BountyBoardScreen extends Screen {
     }
 
     private void openBountyViewer(BountyCategory category) {
-        // ✅ Pass live player data to viewer
         List<Bounty> bounties = categoryBounties.get(category);
         int coins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
         int tokens = minecraft.player != null ? PlayerDataAPI.getTokens(minecraft.player) : 0;

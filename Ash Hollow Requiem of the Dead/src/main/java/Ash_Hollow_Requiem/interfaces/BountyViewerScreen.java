@@ -177,15 +177,36 @@ public class BountyViewerScreen extends Screen {
     private void acceptCurrentBounty() {
         Bounty bounty = bounties.get(currentBountyIndex);
 
-        PacketHandler.sendToServer(new AcceptBountyPacket(
-                bounty.getRarity(),
-                bounty.getType(),
-                false
-        ));
+        // ✅ Check if it's a boss bounty and if player has enough tokens
+        if (bounty.isBossBounty()) {
+            int tokenCost = bounty.getTokenCost();
 
-        minecraft.player.sendSystemMessage(
-                Component.literal("Bounty request sent to server!")
-        );
+            if (playerTokens < tokenCost) {
+                // ❌ Not enough tokens
+                minecraft.player.sendSystemMessage(
+                        Component.literal("❌ Insufficient tokens!")
+                                .withStyle(net.minecraft.ChatFormatting.RED)
+                );
+                minecraft.player.sendSystemMessage(
+                        Component.literal("  Need: " + tokenCost + " | Have: " + playerTokens)
+                                .withStyle(net.minecraft.ChatFormatting.GRAY)
+                );
+
+                // Play error sound
+                minecraft.player.playSound(
+                        net.minecraft.sounds.SoundEvents.VILLAGER_NO,
+                        1.0f,
+                        1.0f
+                );
+                return;
+            }
+        }
+
+        // ✅ Send packet with bounty ID and category
+        PacketHandler.sendToServer(new AcceptBountyPacket(
+                bounty.getBountyId(),
+                category
+        ));
 
         minecraft.setScreen(parent);
     }
@@ -260,17 +281,34 @@ public class BountyViewerScreen extends Screen {
         int textY = cardY + 8;
         int lineHeight = 10;
 
-        // Rarity
+        // Rarity with color
         graphics.drawCenteredString(this.font,
                 bounty.getRarity().name().toUpperCase(),
                 cardX + cardWidth / 2, textY,
                 bounty.getRarity().getColorInt());
         textY += lineHeight + 3;
 
+        // ✅ Show type badge
+        String typeBadge = switch(bounty.getType()) {
+            case STANDARD -> "⚔";
+            case HORDE -> "👥";
+            case ELITE -> "💀";
+            case BOSS -> "👑";
+        };
+        graphics.drawCenteredString(this.font,
+                typeBadge + " " + bounty.getType().name(),
+                cardX + cardWidth / 2, textY, 0x666666);
+        textY += lineHeight + 3;
+
         // Target
         if (!bounty.getTargets().isEmpty()) {
             String targetName = bounty.getTargets().get(0).getEntityType()
                     .getDescription().getString();
+
+            if (font.width(targetName) > cardWidth - 20) {
+                targetName = targetName.substring(0, Math.min(15, targetName.length())) + "...";
+            }
+
             graphics.drawCenteredString(this.font,
                     "Target: " + targetName,
                     cardX + cardWidth / 2, textY, 0x333333);
@@ -282,19 +320,60 @@ public class BountyViewerScreen extends Screen {
             textY += lineHeight + 5;
         }
 
+        // ✅ TOKEN COST - ONLY for BOSS bounties
+        if (bounty.isBossBounty()) {
+            int tokenCost = bounty.getTokenCost();
+            boolean canAfford = playerTokens >= tokenCost;
+
+            graphics.drawString(this.font, "Cost:", cardX + 8, textY, 0x333333);
+            textY += lineHeight;
+
+            int costColor = canAfford ? 0x5AFF5A : 0xFF5555;
+            graphics.drawString(this.font,
+                    "  ⚔ " + tokenCost + " Tokens",
+                    cardX + 15, textY, costColor);
+            textY += lineHeight;
+
+            graphics.drawString(this.font,
+                    "  (You: " + playerTokens + "/100)",
+                    cardX + 15, textY, 0x888888);
+            textY += lineHeight + 3;
+
+            if (!canAfford) {
+                graphics.drawCenteredString(this.font,
+                        "⚠ Need " + (tokenCost - playerTokens) + " more!",
+                        cardX + cardWidth / 2, textY, 0xFF5555);
+                textY += lineHeight + 3;
+            }
+        } else {
+            // ✅ Show "FREE" for non-boss bounties
+            graphics.drawCenteredString(this.font,
+                    "✓ FREE TO ACCEPT",
+                    cardX + cardWidth / 2, textY, 0x5AFF5A);
+            textY += lineHeight + 5;
+        }
+
         // Rewards
         graphics.drawString(this.font, "Rewards:", cardX + 8, textY, 0x333333);
         textY += lineHeight;
 
         graphics.drawString(this.font, "  Coins: " + bounty.getRewardCoins(),
                 cardX + 15, textY, 0xFFD700);
-        textY += lineHeight + 5;
+        textY += lineHeight;
 
-        // Time
+        graphics.drawString(this.font, "  XP: " + bounty.getRewardExperience(),
+                cardX + 15, textY, 0x55FF55);
+        textY += lineHeight + 3;
+
+        // Time remaining
         long timeLeft = bounty.getExpirationTime() - minecraft.player.level().getGameTime();
         long minutes = timeLeft / 1200;
+        long hours = minutes / 60;
+        minutes = minutes % 60;
+
+        String timeString = hours > 0 ? hours + "h " + minutes + "m" : minutes + "m";
         graphics.drawCenteredString(this.font,
-                "Time: " + minutes + " min",
+                "⏱ " + timeString + " left",
                 cardX + cardWidth / 2, textY, 0x666666);
     }
 

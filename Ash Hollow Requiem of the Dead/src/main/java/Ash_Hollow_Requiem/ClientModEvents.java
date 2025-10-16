@@ -1,7 +1,7 @@
 package Ash_Hollow_Requiem;
 
-import Ash_Hollow_Requiem.harpoon.entity.HarpoonEntityRenderer;
-import Ash_Hollow_Requiem.harpoon.item.HarpoonItem;
+import Ash_Hollow_Requiem.items.harpoon.entity.HarpoonEntityRenderer;
+import Ash_Hollow_Requiem.items.harpoon.item.HarpoonItem;
 import Ash_Hollow_Requiem.modregisters.ModEntities;
 import Ash_Hollow_Requiem.modregisters.ModItems;
 import net.minecraftforge.api.distmarker.Dist;

@@ -1,4 +1,4 @@
-package Ash_Hollow_Requiem.harpoon.entity;
+package Ash_Hollow_Requiem.items.harpoon.entity;
 
 import net.minecraft.resources.ResourceLocation;
 import software.bernie.geckolib.model.GeoModel;

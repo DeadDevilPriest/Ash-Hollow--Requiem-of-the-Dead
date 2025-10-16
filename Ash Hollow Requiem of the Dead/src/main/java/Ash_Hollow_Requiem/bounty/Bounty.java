@@ -23,6 +23,9 @@ public class Bounty {
     private final int rewardCoins;
     private final int rewardExperience;
 
+    // ✅ NEW: Token cost for boss bounties
+    private final int tokenCost;
+
     public Bounty(UUID bountyId, BountyRarity rarity, BountyType type,
                   List<BountyTarget> targets, int totalKillsRequired, long expirationTime) {
         this.bountyId = bountyId;
@@ -38,6 +41,9 @@ public class Bounty {
         // Calculate rewards based on rarity
         this.rewardCoins = rarity.getBaseReward();
         this.rewardExperience = rarity.getBaseReward() / 5; // XP is 1/5 of coins
+
+        // ✅ Token cost defaults to 0 for non-boss bounties
+        this.tokenCost = 0;
     }
 
     /**
@@ -57,6 +63,29 @@ public class Bounty {
         this.claimed = false;
         this.rewardCoins = rewardCoins;
         this.rewardExperience = rewardExperience;
+
+        // ✅ Token cost defaults to 0
+        this.tokenCost = 0;
+    }
+
+    /**
+     * ✅ NEW: Full constructor with token cost
+     */
+    public Bounty(UUID bountyId, BountyRarity rarity, BountyType type,
+                  List<BountyTarget> targets, int totalKillsRequired, long expirationTime,
+                  int rewardCoins, int rewardExperience, int tokenCost) {
+        this.bountyId = bountyId;
+        this.rarity = rarity;
+        this.type = type;
+        this.targets = targets;
+        this.totalKillsRequired = totalKillsRequired;
+        this.currentKills = 0;
+        this.expirationTime = expirationTime;
+        this.completed = false;
+        this.claimed = false;
+        this.rewardCoins = rewardCoins;
+        this.rewardExperience = rewardExperience;
+        this.tokenCost = tokenCost;
     }
 
     /**
@@ -87,6 +116,24 @@ public class Bounty {
      */
     public boolean hasExpired(long currentTime) {
         return currentTime > expirationTime && !completed;
+    }
+
+    // ✅ NEW: Check if this is a boss bounty
+    public boolean isBossBounty() {
+        return type == BountyType.BOSS;
+    }
+
+    // ✅ NEW: Get token cost (0 for non-boss bounties)
+    public int getTokenCost() {
+        return isBossBounty() ? tokenCost : 0;
+    }
+
+    // ✅ NEW: Check if player can afford this bounty
+    public boolean canAfford(int playerTokens) {
+        if (!isBossBounty()) {
+            return true; // Non-boss bounties are free
+        }
+        return playerTokens >= tokenCost;
     }
 
     // Getters

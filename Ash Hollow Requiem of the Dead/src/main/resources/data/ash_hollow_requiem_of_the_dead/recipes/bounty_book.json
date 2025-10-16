@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "LBL",
+    "GPG",
+    "LBL"
+  ],
+  "key": {
+    "L": {
+      "item": "minecraft:leather"
+    },
+    "B": {
+      "item": "ash_hollow_requiem_of_the_dead:bounty_paper"
+    },
+    "G": {
+      "item": "minecraft:gold_nugget"
+    },
+    "P": {
+      "item": "minecraft:book"
+    }
+  },
+  "result": {
+    "item": "ash_hollow_requiem_of_the_dead:bounty_book",
+    "count": 1
+  }
+}

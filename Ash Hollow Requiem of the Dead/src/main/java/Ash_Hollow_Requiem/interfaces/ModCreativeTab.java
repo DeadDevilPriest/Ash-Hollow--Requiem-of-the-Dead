@@ -26,6 +26,7 @@ public class ModCreativeTab {
                         output.accept(HARPOON_STICK.get());
                         output.accept(HARPOON.get());
                         output.accept(BOUNTY_BOARD_ITEM.get());
+                        output.accept(BOUNTY_BOOK.get());
                     })
                     .build()
     );

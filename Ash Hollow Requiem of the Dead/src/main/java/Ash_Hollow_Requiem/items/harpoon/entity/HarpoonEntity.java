@@ -1,4 +1,4 @@
-package Ash_Hollow_Requiem.harpoon.entity;
+package Ash_Hollow_Requiem.items.harpoon.entity;
 
 import Ash_Hollow_Requiem.modregisters.ModItems;
 import Ash_Hollow_Requiem.damage.ModDamageSources;
