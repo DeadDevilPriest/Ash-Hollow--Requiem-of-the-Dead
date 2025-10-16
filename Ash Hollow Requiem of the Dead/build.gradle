@@ -68,12 +68,14 @@ dependencies {
 repositories {
     maven {
         url = "https://maven.theillusivec4.top/"
+        content {
+            includeGroup "curse.maven"
+        }
     }
 }
 
 dependencies {
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${version}")
-    compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${version}:api")
+    implementation fg.deobf("curse.maven:curios-309927:6418456")
 }
 
 tasks.withType(JavaCompile).configureEach {
