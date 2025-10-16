@@ -1,6 +1,8 @@
 package Ash_Hollow_Requiem.interfaces;
 
 import Ash_Hollow_Requiem.network.PacketHandler;
+import Ash_Hollow_Requiem.network.PurchaseTokensPacket;
+import Ash_Hollow_Requiem.playerdata.PlayerDataAPI;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -9,14 +11,10 @@ import net.minecraft.ChatFormatting;
 
 public class TokenMerchantScreen extends Screen {
     private final Screen parent;
-    private int playerCoins;
-    private int playerTokens;
 
     protected TokenMerchantScreen(Screen parent, int coins, int tokens) {
         super(Component.literal("Token Merchant"));
         this.parent = parent;
-        this.playerCoins = coins;
-        this.playerTokens = tokens;
     }
 
     @Override
@@ -58,13 +56,17 @@ public class TokenMerchantScreen extends Screen {
 
         int centerX = this.width / 2;
 
+        // ✅ Get LIVE player data
+        int playerCoins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
+        int playerTokens = minecraft.player != null ? PlayerDataAPI.getTokens(minecraft.player) : 0;
+
         // Title with merchant flavor text
         graphics.drawCenteredString(this.font, "Token Merchant", centerX, 20, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
                 "\"Trade your coins for Boss Tokens!\"",
                 centerX, 35, 0xAAAAAA);
 
-        // Player balance
+        // Player balance (live data)
         graphics.drawCenteredString(this.font, "Your Coins: " + playerCoins,
                 centerX, 60, 0xFFD700);
         graphics.drawCenteredString(this.font, "Boss Tokens: " + playerTokens,
@@ -78,36 +80,10 @@ public class TokenMerchantScreen extends Screen {
         super.render(graphics, mouseX, mouseY, partialTick);
     }
 
+    private void exchange(int coinCost, int tokensGained) {
+        // ✅ Send packet to server to handle the exchange
+        PacketHandler.sendToServer(new PurchaseTokensPacket(coinCost, tokensGained));
 
-    public void setPlayerTokens(int playerTokens) {
-        this.playerTokens = playerTokens;
-    }
-
-    private int exchange(int coinCost, int tokensGained) {
-        if (playerCoins >= coinCost) {
-            // TODO: Send packet to server to exchange
-            playerCoins -= coinCost;
-            playerTokens += tokensGained;
-
-            minecraft.player.displayClientMessage(
-                    Component.literal("✓ Exchanged " + coinCost + " coins for " +
-                                    tokensGained + " tokens!")
-                            .withStyle(ChatFormatting.GREEN),
-                    false
-            );
-            // send updated token and coin count to server
-            PacketHandler.sendToServer(new (playerCoins, playerTokens));
-
-            // Refresh the screen
-            this.rebuildWidgets();
-        } else {
-            minecraft.player.displayClientMessage(
-                    Component.literal("✗ Not enough coins!")
-                            .withStyle(ChatFormatting.RED),
-                    false
-            );
-        }
-        return coinCost;
+        // Screen will automatically update on next render since it reads live data
     }
 }
-

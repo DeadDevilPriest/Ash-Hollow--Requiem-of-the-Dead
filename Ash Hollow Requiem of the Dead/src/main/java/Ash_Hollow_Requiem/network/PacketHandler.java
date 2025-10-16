@@ -69,6 +69,20 @@ public class PacketHandler {
                 .consumerMainThread(ClaimBountyPacket::handle)
                 .add();
 
+        // Purchase Tokens (Client -> Server)
+        INSTANCE.messageBuilder(PurchaseTokensPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(PurchaseTokensPacket::toBytes)
+                .decoder(PurchaseTokensPacket::new)
+                .consumerMainThread(PurchaseTokensPacket::handle)
+                .add();
+
+        // Purchase Item (Client -> Server)
+        INSTANCE.messageBuilder(PurchaseItemPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(PurchaseItemPacket::toBytes)
+                .decoder(PurchaseItemPacket::new)
+                .consumerMainThread(PurchaseItemPacket::handle)
+                .add();
+
         System.out.println("✅ All network packets registered!");
     }
 

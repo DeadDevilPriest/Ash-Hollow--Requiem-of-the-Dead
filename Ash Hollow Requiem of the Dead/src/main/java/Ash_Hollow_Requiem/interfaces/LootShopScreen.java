@@ -1,23 +1,19 @@
 package Ash_Hollow_Requiem.interfaces;
 
-import Ash_Hollow_Requiem.bounty.Bounty;
-import Ash_Hollow_Requiem.bounty.BountyTarget;
+import Ash_Hollow_Requiem.network.PacketHandler;
+import Ash_Hollow_Requiem.network.PurchaseItemPacket;
+import Ash_Hollow_Requiem.playerdata.PlayerDataAPI;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.ChatFormatting;
-
-import java.util.List;
 
 public class LootShopScreen extends Screen {
     private final Screen parent;
-    private int playerCoins;
 
     protected LootShopScreen(Screen parent, int coins) {
         super(Component.literal("Loot Shop"));
         this.parent = parent;
-        this.playerCoins = coins;
     }
 
     @Override
@@ -65,6 +61,9 @@ public class LootShopScreen extends Screen {
 
         int centerX = this.width / 2;
 
+        // ✅ Get LIVE player data
+        int playerCoins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
+
         graphics.drawCenteredString(this.font, "Loot Shop", centerX, 20, 0xFFFFFF);
         graphics.drawCenteredString(this.font,
                 "\"Spend your hard-earned coins!\"",
@@ -76,23 +75,9 @@ public class LootShopScreen extends Screen {
     }
 
     private void buyItem(String itemName, int cost) {
-        if (playerCoins >= cost) {
-            // TODO: Send packet to server to purchase item
-            playerCoins -= cost;
+        // ✅ Send packet to server to handle the purchase
+        PacketHandler.sendToServer(new PurchaseItemPacket(itemName, cost));
 
-            minecraft.player.displayClientMessage(
-                    Component.literal("✓ Purchased " + itemName + "!")
-                            .withStyle(ChatFormatting.GREEN),
-                    false
-            );
-
-            this.rebuildWidgets();
-        } else {
-            minecraft.player.displayClientMessage(
-                    Component.literal("✗ Not enough coins!")
-                            .withStyle(ChatFormatting.RED),
-                    false
-            );
-        }
+        // Screen will automatically update on next render since it reads live data
     }
 }
