@@ -66,16 +66,17 @@ dependencies {
 }
 
 repositories {
-    maven {
-        url = "https://maven.theillusivec4.top/"
-        content {
-            includeGroup "curse.maven"
-        }
-    }
+  maven {
+    name = "Illusive Soulworks maven"
+    url = "https://maven.theillusivec4.top/"
+  }
 }
 
 dependencies {
-    implementation fg.deobf("curse.maven:curios-309927:6418456")
+    // Compile against only the API artifact
+    compileOnly(fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}:api"))
+    // Use the full Curios API jar at runtime
+    runtimeOnly(fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}"))
 }
 
 tasks.withType(JavaCompile).configureEach {
