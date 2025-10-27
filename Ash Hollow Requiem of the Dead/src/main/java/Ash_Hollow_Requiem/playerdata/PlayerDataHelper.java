@@ -61,6 +61,26 @@ public class PlayerDataHelper {
         return success[0];
     }
 
+    public static int getRebirthTokens(Player player) {
+        return getData(player).getTokens();
+    }
+
+    public static void addRebirthTokens(Player player, int amount) {
+        player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(data -> {
+            data.addTokens(amount);
+            // TODO: Add sync to client
+        });
+    }
+
+    public static boolean spendRebirthTokens(Player player, int amount) {
+        boolean[] success = {false};
+        player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(data -> {
+            success[0] = data.spendTokens(amount);
+            // TODO: Add sync to client
+        });
+        return success[0];
+    }
+
     // ========== Skill Points Methods ========== //
 
     public static int getSkillPoints(Player player) {

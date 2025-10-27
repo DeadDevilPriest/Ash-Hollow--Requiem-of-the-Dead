@@ -76,6 +76,13 @@ public class PacketHandler {
                 .consumerMainThread(PurchaseTokensPacket::handle)
                 .add();
 
+        // Purchase Rebirth Tokens (Client -> Server)
+        INSTANCE.messageBuilder(PurchaseRebirthTokensPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
+                .encoder(PurchaseRebirthTokensPacket::toBytes)
+                .decoder(PurchaseRebirthTokensPacket::new)
+                .consumerMainThread(PurchaseRebirthTokensPacket::handle)
+                .add();
+
         // Purchase Item (Client -> Server)
         INSTANCE.messageBuilder(PurchaseItemPacket.class, id(), NetworkDirection.PLAY_TO_SERVER)
                 .encoder(PurchaseItemPacket::toBytes)

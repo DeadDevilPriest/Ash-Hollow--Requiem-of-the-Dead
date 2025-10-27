@@ -27,6 +27,27 @@ public class ModCreativeTab {
                         output.accept(HARPOON.get());
                         output.accept(BOUNTY_BOARD_ITEM.get());
                         output.accept(BOUNTY_BOOK.get());
+                        output.accept(SOUL_FRAGMENT.get());
+                        output.accept(BOUNTY_PAPER.get());
+                        output.accept(INK_PRESS.get());
+                        output.accept(ALCHEMISTS_ENHANCEMENT_TOOL.get());
+                        output.accept(INK_MIXER.get());
+                        output.accept(EMPTY_INK_BOTTLE.get());
+                        output.accept(INK_BOTTLE.get());
+                        output.accept(SOUL_INK_BOTTLE.get());
+                        output.accept(EMPTY_SYRINGE.get());
+                        output.accept(RAGE_SYRINGE.get());
+                        output.accept(WEAK_RAGE_SYRINGE.get());
+                        output.accept(WEAK_ANTIDOTE_SYRINGE.get());
+                        output.accept(ANTIDOTE_SYRINGE.get());
+                        output.accept(WEAK_HEAL_SYRINGE.get());
+                        output.accept(HEAL_SYRINGE.get());
+                        output.accept(SPEED_SYRINGE.get());
+                        output.accept(WEAK_SPEED_SYRINGE.get());
+                        output.accept(REGENERATION_SYRINGE.get());
+                        output.accept(WEAK_REGENERATION_SYRINGE.get());
+                        output.accept(WEAK_THICK_SKIN_SYRINGE.get());
+                        output.accept(THICK_SKIN_SYRINGE.get());
                     })
                     .build()
     );

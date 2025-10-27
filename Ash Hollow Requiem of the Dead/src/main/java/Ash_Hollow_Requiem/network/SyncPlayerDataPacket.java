@@ -70,6 +70,7 @@ public class SyncPlayerDataPacket {
                                     System.out.println("✅ Client received and updated PlayerData!");
                                     System.out.println("   Coins: " + data.getCoins());
                                     System.out.println("   Tokens: " + data.getTokens());
+                                    System.out.println("  Rebirth Tokens: " + data.getRebirthTokens());
                                     System.out.println("   Skill Points: " + data.getSkillPoints());
                                 } else {
                                     System.out.println("⚠️ Received empty PlayerData packet");

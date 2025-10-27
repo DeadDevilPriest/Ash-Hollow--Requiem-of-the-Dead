@@ -37,11 +37,25 @@ public class KeyBindings {
         "key.category." + MODID
     );
 
+    public static final KeyMapping OPEN_BOUNTY_KEY = new KeyMapping(
+            "Open Active Bounty",
+            GLFW.GLFW_KEY_O, // Or whatever key you want
+            "key.category." + MODID
+    );
+
+    public static final KeyMapping OPEN_SKILL_INTERFACE_KEY = new KeyMapping(
+            "Open Skill Interface",
+            GLFW.GLFW_KEY_K, // Or whatever key you want
+            "key.category." + MODID
+    );
+
     @SubscribeEvent
     public static void registerKeyBindings(RegisterKeyMappingsEvent event) {
         event.register(DARK_VISION_KEY);
         event.register(PUSH_TO_TALK_KEY);
         event.register(WHISPER_KEY);
         event.register(SHOUT_KEY);
+        event.register(OPEN_BOUNTY_KEY);
+        event.register(OPEN_SKILL_INTERFACE_KEY);
     }
 }

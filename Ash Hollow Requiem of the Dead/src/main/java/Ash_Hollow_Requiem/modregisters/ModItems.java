@@ -159,4 +159,10 @@ public class ModItems {
             () -> new EmptyInkBottleItem(new Item.Properties()
                     .stacksTo(16))
     );
+
+    public static final RegistryObject <Item> ALCHEMISTS_ENHANCEMENT_TOOL = ITEMS.register(
+            "alchemists_enhancement_tool",
+            () -> new AlchemistsEnhancementToolItem(new Item.Properties()
+                    .stacksTo(1))
+    );
 }

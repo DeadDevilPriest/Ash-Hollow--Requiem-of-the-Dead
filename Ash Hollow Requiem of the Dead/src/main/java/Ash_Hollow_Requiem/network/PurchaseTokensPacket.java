@@ -30,6 +30,9 @@ public class PurchaseTokensPacket {
         buf.writeInt(tokensGained);
     }
 
+    /**
+     * Tokens Gained logic
+     */
     public void handle(Supplier<NetworkEvent.Context> ctx) {
         ctx.get().enqueueWork(() -> {
             ServerPlayer player = ctx.get().getSender();

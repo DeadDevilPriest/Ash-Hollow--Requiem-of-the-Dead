@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "size": 1,
+  "operation": "SET",
+  "icon": "ash_hollow_requiem_of_the_dead:textures/gui/slots/book",
+  "order": 100,
+  "add_cosmetic": true,
+  "use_native_gui": true,
+  "render_toggle": true,
+  "drop_rule": "DEFAULT"
+}

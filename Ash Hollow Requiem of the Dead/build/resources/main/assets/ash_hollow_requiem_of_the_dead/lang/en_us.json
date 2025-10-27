@@ -11,5 +11,32 @@
   "death.attack.harpoon": "%1$s was impaled by a harpoon",
   "death.attack.harpoon.player": "%1$s was impaled by %2$s's harpoon",
   "death.attack.bleeding": "%1$s bled to death",
-  "death.attack.bleeding.player": "%1$s bled to death from %2$s's wound"
+  "death.attack.bleeding.player": "%1$s bled to death from %2$s's wound",
+
+  "item.ash_hollow_requiem_of_the_dead.bounty_book": "Bounty Book",
+  "item.ash_hollow_requiem_of_the_dead.bounty_book.tooltip": "Track your active bounty contracts",
+
+  "item.ash_hollow_requiem_of_the_dead.bounty_paper": "Bounty Paper",
+  "item.ash_hollow_requiem_of_the_dead.bounty_book": "Bounty Book",
+  "block.ash_hollow_requiem_of_the_dead.ink_press": "Ink Press",
+
+  "item.ash_hollow_requiem_of_the_dead.bounty_paper.tooltip.1": "Official contract paper",
+  "item.ash_hollow_requiem_of_the_dead.bounty_paper.tooltip.2": "Stamped and certified",
+  "item.ash_hollow_requiem_of_the_dead.bounty_book.tooltip": "Right-click to view your active bounty",
+
+  "item.ash_hollow_requiem_of_the_dead.soul_fragment": "Soul Fragment",
+  "item.ash_hollow_requiem_of_the_dead.empty_ink_bottle": "Empty Ink Bottle",
+  "item.ash_hollow_requiem_of_the_dead.ink_bottle": "Ink Bottle",
+  "item.ash_hollow_requiem_of_the_dead.soul_ink_bottle": "Soul Ink Bottle",
+  "block.ash_hollow_requiem_of_the_dead.ink_mixer": "Ink Mixer",
+
+  "item.ash_hollow_requiem_of_the_dead.soul_fragment.tooltip": "Fragment of a tormented soul",
+  "item.ash_hollow_requiem_of_the_dead.empty_ink_bottle.tooltip": "Can be filled at an Ink Mixer",
+  "item.ash_hollow_requiem_of_the_dead.ink_bottle.tooltip": "Standard quality ink",
+  "item.ash_hollow_requiem_of_the_dead.soul_ink_bottle.tooltip": "Infused with tormented souls",
+
+  "curios.identifier.book": "Bounty Book",
+  "curios.modifiers.book": "When in Book slot:",
+  "curios.identifier.alchemists_tool": "Alchemist's Tool",
+  "curios.modifiers.alchemists_tool": "When in Tool slot:"
 }

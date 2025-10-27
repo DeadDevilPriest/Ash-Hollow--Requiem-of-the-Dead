@@ -3,7 +3,7 @@ package Ash_Hollow_Requiem.modregisters;
 import Ash_Hollow_Requiem.Ash_Hollow;
 import Ash_Hollow_Requiem.blocks.InkMixerBlock;
 import Ash_Hollow_Requiem.blocks.InkPressBlock;
-import Ash_Hollow_Requiem.bountyboard.BountyBoardBlock;
+import Ash_Hollow_Requiem.blocks.BountyBoardBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;

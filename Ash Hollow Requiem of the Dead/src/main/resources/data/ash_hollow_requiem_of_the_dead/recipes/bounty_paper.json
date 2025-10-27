@@ -1,0 +1,11 @@
+{
+  "type": "ash_hollow_requiem_of_the_dead:pressing",
+  "key": {
+    "P": {
+      "item": "minecraft:paper"
+    },
+    "S": {
+      "item": "ash_hollow_requiem_of_the_dead:soul_ink_bottle"
+    }
+  }
+}

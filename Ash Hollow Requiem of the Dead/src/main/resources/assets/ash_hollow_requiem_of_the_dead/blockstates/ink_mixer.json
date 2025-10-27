@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": { "model": "ash_hollow_requiem_of_the_dead:block/ink_mixer" },
+    "facing=east": { "model": "ash_hollow_requiem_of_the_dead:block/ink_mixer", "y": 90 },
+    "facing=south": { "model": "ash_hollow_requiem_of_the_dead:block/ink_mixer", "y": 180 },
+    "facing=west": { "model": "ash_hollow_requiem_of_the_dead:block/ink_mixer", "y": 270 }
+  }
+}

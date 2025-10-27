@@ -2,6 +2,7 @@ package Ash_Hollow_Requiem.interfaces;
 
 import Ash_Hollow_Requiem.network.PacketHandler;
 import Ash_Hollow_Requiem.network.PurchaseTokensPacket;
+import Ash_Hollow_Requiem.network.PurchaseRebirthTokensPacket;
 import Ash_Hollow_Requiem.playerdata.PlayerDataAPI;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -22,7 +23,7 @@ public class TokenMerchantScreen extends Screen {
         int centerX = this.width / 2;
         int startY = this.height / 4 + 60;
 
-        // Exchange buttons with bonus deals
+        // Exchange buttons with bonus deals for Tokens
         this.addRenderableWidget(Button.builder(
                 Component.literal("100 Coins → 1 Token"),
                 btn -> exchange(100, 1)
@@ -43,6 +44,27 @@ public class TokenMerchantScreen extends Screen {
                 btn -> exchange(5000, 100)
         ).bounds(centerX - 100, startY + 75, 200, 20).build());
 
+        // Exchange buttons with bonus deals for Rebirth Tokens
+        this.addRenderableWidget(Button.builder(
+                Component.literal("100 Coins → 1 Rebirth Token"),
+                btn -> exchangeRebirthToken(100, 1)
+        ).bounds(centerX - 100, startY, 200, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+                Component.literal("500 Coins → 3 Rebith Tokens (BONUS!)"),
+                btn -> exchangeRebirthToken(500, 3)
+        ).bounds(centerX - 100, startY + 25, 200, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+                Component.literal("1000 Coins → 9 Rebirth Tokens (MEGA BONUS!)"),
+                btn -> exchangeRebirthToken(1000, 9)
+        ).bounds(centerX - 100, startY + 50, 200, 20).build());
+
+        this.addRenderableWidget(Button.builder(
+                Component.literal("5000 Coins → 18 Rebirth Tokens (LEGENDARY!)"),
+                btn -> exchangeRebirthToken(5000, 18)
+        ).bounds(centerX - 100, startY + 75, 200, 20).build());
+
         // Back button
         this.addRenderableWidget(Button.builder(
                 Component.literal("Back to Board"),
@@ -59,6 +81,8 @@ public class TokenMerchantScreen extends Screen {
         // ✅ Get LIVE player data
         int playerCoins = minecraft.player != null ? PlayerDataAPI.getCoins(minecraft.player) : 0;
         int playerTokens = minecraft.player != null ? PlayerDataAPI.getTokens(minecraft.player) : 0;
+        int playersRebirthTokens = minecraft.player != null ? PlayerDataAPI.getRebirthTokens(minecraft.player) : 0;
+
 
         // Title with merchant flavor text
         graphics.drawCenteredString(this.font, "Token Merchant", centerX, 20, 0xFFFFFF);
@@ -71,6 +95,8 @@ public class TokenMerchantScreen extends Screen {
                 centerX, 60, 0xFFD700);
         graphics.drawCenteredString(this.font, "Boss Tokens: " + playerTokens,
                 centerX, 75, 0xFF5AFF5A);
+        graphics.drawCenteredString(this.font, "Rebirth Token" + playersRebirthTokens,
+                centerX, 90, 0xFF5AFF5A);
 
         // Hint text
         graphics.drawCenteredString(this.font,
@@ -83,6 +109,13 @@ public class TokenMerchantScreen extends Screen {
     private void exchange(int coinCost, int tokensGained) {
         // ✅ Send packet to server to handle the exchange
         PacketHandler.sendToServer(new PurchaseTokensPacket(coinCost, tokensGained));
+
+        // Screen will automatically update on next render since it reads live data
+    }
+
+    private void exchangeRebirthToken(int coinCost, int rebirthtokensGained) {
+        // ✅ Send packet to server to handle the exchange
+        PacketHandler.sendToServer(new PurchaseRebirthTokensPacket(coinCost, rebirthtokensGained));
 
         // Screen will automatically update on next render since it reads live data
     }

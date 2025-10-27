@@ -13,15 +13,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
-/**
- * Event handlers for PlayerData capability
- * With improved error handling and null safety
- */
 public class PlayerDataEvents {
 
-    /**
-     * MOD Bus events - runs during mod initialization
-     */
     @Mod.EventBusSubscriber(modid = "ash_hollow_requiem_of_the_dead", bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class ModBusEvents {
         @SubscribeEvent
@@ -30,15 +23,12 @@ public class PlayerDataEvents {
                 event.register(PlayerData.class);
                 System.out.println("✅ PlayerData capability registered!");
             } catch (Exception e) {
-                System.err.println("❌ Failed to register PlayerData capability: " + e.getMessage());
+                System.err.println("❌ Failed to register capability: " + e.getMessage());
                 e.printStackTrace();
             }
         }
     }
 
-    /**
-     * FORGE Bus events - runs during gameplay
-     */
     @Mod.EventBusSubscriber(modid = "ash_hollow_requiem_of_the_dead")
     public static class ForgeBusEvents {
 
@@ -49,16 +39,15 @@ public class PlayerDataEvents {
             }
 
             try {
-                // Check if capability already exists
+                // Attach ONLY PlayerData capability (it contains everything!)
                 if (!player.getCapability(PlayerDataProvider.PLAYER_DATA).isPresent()) {
                     event.addCapability(
-                            new ResourceLocation("ash_hollow_requiem_of_the_dead", "playerdata"),
+                            ResourceLocation.fromNamespaceAndPath("ash_hollow_requiem_of_the_dead", "playerdata"),
                             new PlayerDataProvider()
                     );
-                    System.out.println("✅ Attached PlayerData to player: " + player.getName().getString());
                 }
             } catch (Exception e) {
-                System.err.println("❌ Failed to attach PlayerData to player: " + e.getMessage());
+                System.err.println("❌ Failed to attach PlayerData: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -76,10 +65,10 @@ public class PlayerDataEvents {
 
                 oldPlayer.reviveCaps();
 
+                // Clone PlayerData (contains attributes, skills, everything!)
                 oldPlayer.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(oldData -> {
                     newPlayer.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(newData -> {
                         newData.copyFrom(oldData);
-                        System.out.println("✅ Copied PlayerData from old to new player");
                     });
                 });
 
@@ -88,6 +77,8 @@ public class PlayerDataEvents {
                 if (event.isWasDeath() && newPlayer instanceof ServerPlayer serverPlayer) {
                     syncToClient(serverPlayer);
                 }
+
+                System.out.println("✅ Cloned PlayerData from old to new player");
             } catch (Exception e) {
                 System.err.println("❌ Failed to clone PlayerData: " + e.getMessage());
                 e.printStackTrace();
@@ -98,21 +89,14 @@ public class PlayerDataEvents {
         public static void onPlayerLogin(PlayerEvent.PlayerLoggedInEvent event) {
             try {
                 if (event.getEntity() instanceof ServerPlayer serverPlayer) {
-                    // Delay sync to ensure everything is loaded
                     net.minecraft.server.MinecraftServer server = serverPlayer.getServer();
                     if (server != null) {
-                        // Wait 20 ticks (1 second) before syncing in singleplayer
-                        // This ensures the client is fully ready
                         final int delay = server.isDedicatedServer() ? 1 : 20;
-
-                        server.execute(() -> {
-                            // Schedule the sync
-                            scheduleSync(server, serverPlayer, delay);
-                        });
+                        server.execute(() -> scheduleSync(server, serverPlayer, delay));
                     }
                 }
             } catch (Exception e) {
-                System.err.println("❌ Failed to sync PlayerData on login: " + e.getMessage());
+                System.err.println("❌ Failed to sync on login: " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -133,7 +117,7 @@ public class PlayerDataEvents {
                     syncToClient(serverPlayer);
                 }
             } catch (Exception e) {
-                System.err.println("❌ Failed to sync PlayerData on dimension change: " + e.getMessage());
+                System.err.println("❌ Failed to sync on dimension change: " + e.getMessage());
             }
         }
 
@@ -144,14 +128,10 @@ public class PlayerDataEvents {
                     syncToClient(serverPlayer);
                 }
             } catch (Exception e) {
-                System.err.println("❌ Failed to sync PlayerData on respawn: " + e.getMessage());
+                System.err.println("❌ Failed to sync on respawn: " + e.getMessage());
             }
         }
 
-        /**
-         * Sync player data to client using PacketHandler
-         * With null safety and error handling
-         */
         private static void syncToClient(ServerPlayer player) {
             if (player == null) {
                 System.err.println("❌ Cannot sync to null player!");
@@ -159,17 +139,15 @@ public class PlayerDataEvents {
             }
 
             try {
-                player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(
-                        data -> {
-                            try {
-                                CompoundTag nbt = new CompoundTag();
-                                data.saveNBTData(nbt);
-                                PacketHandler.sendToPlayer(new SyncPlayerDataPacket(nbt), player);
-                            } catch (Exception e) {
-                                System.err.println("❌ Failed to create sync packet: " + e.getMessage());
-                            }
-                        }
-                );
+                player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(data -> {
+                    try {
+                        CompoundTag nbt = new CompoundTag();
+                        data.saveNBTData(nbt);
+                        PacketHandler.sendToPlayer(new SyncPlayerDataPacket(nbt), player);
+                    } catch (Exception e) {
+                        System.err.println("❌ Failed to create sync packet: " + e.getMessage());
+                    }
+                });
             } catch (Exception e) {
                 System.err.println("❌ Failed to sync PlayerData: " + e.getMessage());
                 e.printStackTrace();

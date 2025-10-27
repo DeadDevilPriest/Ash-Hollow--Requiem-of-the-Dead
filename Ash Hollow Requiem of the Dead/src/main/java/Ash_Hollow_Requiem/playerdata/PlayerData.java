@@ -1,30 +1,42 @@
 package Ash_Hollow_Requiem.playerdata;
 
+import Ash_Hollow_Requiem.skilltributes.Attributes;
+import Ash_Hollow_Requiem.skilltributes.Skills;
+import Ash_Hollow_Requiem.bounty.Bounty;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
- * STEP 1: The Data Class
- *
- * This class stores all the custom data for a player.
- * Think of it as a container with:
- * - Variables to hold data (coins, tokens, etc.)
- * - Methods to modify data (addCoins, spendCoins, etc.)
- * - Methods to save/load from NBT
+ * Stores all persistent player data including currency, attributes, and skills
  */
 public class PlayerData {
 
-    // ========== THE DATA WE WANT TO STORE ========== //
+    private int coins = 0;
+    private int tokens = 0;
+    private int skillPoints = 0;
+    private int rebirthTokens = 0;
 
-    private int coins = 0;           // Player's coins (starts at 0)
-    private int tokens = 0;          // Player's tokens (starts at 0)
-    private int skillPoints = 0;     // Player's skill points (starts at 0)
+    // Attributes system (leveled by doing activities)
+    private Attributes attributes = new Attributes();
 
-    // We could add more later like:
-    // private List<Bounty> activeBounties = new ArrayList<>();
-    // private Set<String> unlockedSkills = new HashSet<>();
+    // Skills system (unlocked abilities)
+    private Skills skills = new Skills();
 
+    private List<Bounty> activeBounties = new ArrayList<>();
+    private Set<String> unlockedSkills = new HashSet<>();
 
-    // ========== GETTERS (Read the data) ========== //
+    // Skill levels: Map<SkillID, Level>
+    private Map<String, Integer> skillLevels = new HashMap<>();
+
+    // ========== GETTERS ========== //
 
     public int getCoins() {
         return coins;
@@ -38,11 +50,46 @@ public class PlayerData {
         return skillPoints;
     }
 
+    public Attributes getAttributes() {
+        return attributes;
+    }
 
-    // ========== SETTERS (Change the data) ========== //
+    public Skills getSkills() {
+        return skills;
+    }
+
+    public List<Bounty> getActiveBounties() {
+        return activeBounties;
+    }
+
+    public Set<String> getUnlockedSkills() {
+        return unlockedSkills;
+    }
+
+    /**
+     * Get skill level (0 if not unlocked)
+     */
+    public int getSkillLevel(String skillId) {
+        return skillLevels.getOrDefault(skillId, 0);
+    }
+
+    /**
+     * Get all skill levels
+     */
+    public Map<String, Integer> getSkillLevels() {
+        return skillLevels;
+    }
+
+    // And update these methods:
+    public int getRebirthTokens() {  // ✅ Already correct
+        return rebirthTokens;  // Change from rebirthtokens
+    }
+
+
+    // ========== SETTERS ========== //
 
     public void setCoins(int coins) {
-        this.coins = Math.max(0, coins);  // Can't have negative coins
+        this.coins = Math.max(0, coins);
     }
 
     public void setTokens(int tokens) {
@@ -53,37 +100,28 @@ public class PlayerData {
         this.skillPoints = Math.max(0, skillPoints);
     }
 
+    public void setRebirthTokens(int rebirthTokens) {  // ✅ Already correct
+        this.rebirthTokens = rebirthTokens;  // Change from rebirthtokens
+    }
 
-    // ========== MODIFY METHODS (Add/Spend) ========== //
+    // ========== MODIFY METHODS ========== //
 
-    /**
-     * Add coins to the player
-     */
     public void addCoins(int amount) {
         this.coins += amount;
     }
 
-    /**
-     * Try to spend coins. Returns true if successful.
-     */
     public boolean spendCoins(int amount) {
         if (coins >= amount) {
             coins -= amount;
-            return true;  // Success!
+            return true;
         }
-        return false;  // Not enough coins
+        return false;
     }
 
-    /**
-     * Add tokens to the player
-     */
     public void addTokens(int amount) {
         this.tokens += amount;
     }
 
-    /**
-     * Try to spend tokens. Returns true if successful.
-     */
     public boolean spendTokens(int amount) {
         if (tokens >= amount) {
             tokens -= amount;
@@ -92,16 +130,22 @@ public class PlayerData {
         return false;
     }
 
-    /**
-     * Add skill points to the player
-     */
+    public void addRebirthTokens(int amount) {
+        this.rebirthTokens += amount;  // Change from rebirthtokens
+    }
+
+    public boolean spendRebirthTokens(int amount) {
+        if (rebirthTokens >= amount) {  // Change from rebirthtokens
+            rebirthTokens -= amount;  // Change from rebirthtokens
+            return true;
+        }
+        return false;
+    }
+
     public void addSkillPoints(int amount) {
         this.skillPoints += amount;
     }
 
-    /**
-     * Try to spend skill points. Returns true if successful.
-     */
     public boolean spendSkillPoints(int amount) {
         if (skillPoints >= amount) {
             skillPoints -= amount;
@@ -110,66 +154,125 @@ public class PlayerData {
         return false;
     }
 
-
-    // ========== NBT SERIALIZATION (Save/Load) ========== //
+    /**
+     * Unlock a skill by its registry name (sets to level 1)
+     */
+    public boolean unlockSkill(String skillName) {
+        if (unlockedSkills.add(skillName)) {
+            skillLevels.put(skillName, 1);
+            return true;
+        }
+        return false;
+    }
 
     /**
-     * SAVE: Convert our data into NBT format
-     *
-     * This is called when:
-     * - Player logs out
-     * - Player dies
-     * - Server saves the world
-     *
-     * Think of it like: Converting your data into a file that can be saved
+     * Check if a skill is unlocked (level > 0)
      */
+    public boolean hasSkill(String skillName) {
+        return skillLevels.getOrDefault(skillName, 0) > 0;
+    }
+
+    /**
+     * Upgrade a skill to the next level
+     * @return true if successfully upgraded
+     */
+    public boolean upgradeSkill(String skillName) {
+        int currentLevel = skillLevels.getOrDefault(skillName, 0);
+        if (currentLevel > 0) {
+            skillLevels.put(skillName, currentLevel + 1);
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Set skill to a specific level
+     */
+    public void setSkillLevel(String skillName, int level) {
+        if (level > 0) {
+            unlockedSkills.add(skillName);
+            skillLevels.put(skillName, level);
+        } else {
+            unlockedSkills.remove(skillName);
+            skillLevels.remove(skillName);
+        }
+    }
+
+    // ========== NBT SERIALIZATION ========== //
+
     public void saveNBTData(CompoundTag nbt) {
-        // CompoundTag is like a dictionary/map
-        // We put our data in with a key (string) and value
+        // Save currency
+        nbt.putInt("Coins", coins);
+        nbt.putInt("Tokens", tokens);
+        nbt.putInt("RebirthTokens", rebirthTokens);
+        nbt.putInt("SkillPoints", skillPoints);
 
-        nbt.putInt("Coins", coins);              // Save coins with key "Coins"
-        nbt.putInt("Tokens", tokens);            // Save tokens with key "Tokens"
-        nbt.putInt("SkillPoints", skillPoints);  // Save skill points with key "SkillPoints"
+        // Save attributes
+        CompoundTag attributesTag = new CompoundTag();
+        attributes.saveToNBT(attributesTag);
+        nbt.put("Attributes", attributesTag);
 
-        // Later you can add more complex data:
-        // nbt.put("ActiveBounties", bountiesListTag);
-        // nbt.put("UnlockedSkills", skillsListTag);
+        // Save unlocked skills
+        ListTag skillsList = new ListTag();
+        for (String skill : unlockedSkills) {
+            skillsList.add(StringTag.valueOf(skill));
+        }
+        nbt.put("UnlockedSkills", skillsList);
+
+        // Save skill levels
+        CompoundTag skillLevelsTag = new CompoundTag();
+        for (Map.Entry<String, Integer> entry : skillLevels.entrySet()) {
+            skillLevelsTag.putInt(entry.getKey(), entry.getValue());
+        }
+        nbt.put("SkillLevels", skillLevelsTag);
+
+        // TODO: Save activeBounties when Bounty implements NBT serialization
     }
 
-    /**
-     * LOAD: Read data from NBT format
-     *
-     * This is called when:
-     * - Player logs in
-     * - Player respawns
-     * - Server loads the world
-     *
-     * Think of it like: Reading your data from a saved file
-     */
     public void loadNBTData(CompoundTag nbt) {
-        // Read the data using the same keys we used to save
+        // Load currency
+        this.coins = nbt.getInt("Coins");
+        this.tokens = nbt.getInt("Tokens");
+        this.skillPoints = nbt.getInt("SkillPoints");
+        this.rebirthTokens= nbt.getInt("RebirthTokens");
 
-        this.coins = nbt.getInt("Coins");              // Load coins
-        this.tokens = nbt.getInt("Tokens");            // Load tokens
-        this.skillPoints = nbt.getInt("SkillPoints");  // Load skill points
+        // Load attributes
+        if (nbt.contains("Attributes")) {
+            attributes.loadFromNBT(nbt.getCompound("Attributes"));
+        }
 
-        // If the key doesn't exist, getInt returns 0 (perfect for new players!)
+        // Load unlocked skills
+        if (nbt.contains("UnlockedSkills")) {
+            ListTag skillsList = nbt.getList("UnlockedSkills", 8); // 8 = String type
+            unlockedSkills.clear();
+            for (int i = 0; i < skillsList.size(); i++) {
+                unlockedSkills.add(skillsList.getString(i));
+            }
+        }
+
+        // Load skill levels
+        if (nbt.contains("SkillLevels")) {
+            CompoundTag skillLevelsTag = nbt.getCompound("SkillLevels");
+            skillLevels.clear();
+            for (String key : skillLevelsTag.getAllKeys()) {
+                skillLevels.put(key, skillLevelsTag.getInt(key));
+            }
+        }
+
+        // TODO: Load activeBounties when implemented
     }
 
+    // ========== COPY METHOD ========== //
 
-    // ========== COPY METHOD (For respawning) ========== //
-
-    /**
-     * Copy data from another PlayerData instance
-     *
-     * This is used when a player dies:
-     * - Old player entity is deleted
-     * - New player entity is created
-     * - We need to copy data from old to new
-     */
     public void copyFrom(PlayerData other) {
         this.coins = other.coins;
         this.tokens = other.tokens;
+        this.rebirthTokens = other.rebirthTokens;
         this.skillPoints = other.skillPoints;
+        this.attributes = new Attributes();
+        this.attributes.copyFrom(other.attributes);
+        this.unlockedSkills = new HashSet<>(other.unlockedSkills);
+        this.skillLevels = new HashMap<>(other.skillLevels);
+        this.activeBounties = new ArrayList<>(other.activeBounties);
     }
 }

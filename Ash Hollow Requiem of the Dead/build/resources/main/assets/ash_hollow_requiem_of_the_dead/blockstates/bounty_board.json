@@ -1,7 +1,8 @@
 {
   "variants": {
-    "": {
-      "model": "ash_hollow_requiem_of_the_dead:block/bounty_board"
-    }
+    "facing=north": { "model": "ash_hollow_requiem_of_the_dead:block/bounty_board" },
+    "facing=east": { "model": "ash_hollow_requiem_of_the_dead:block/bounty_board", "y": 90 },
+    "facing=south": { "model": "ash_hollow_requiem_of_the_dead:block/bounty_board", "y": 180 },
+    "facing=west": { "model": "ash_hollow_requiem_of_the_dead:block/bounty_board", "y": 270 }
   }
 }

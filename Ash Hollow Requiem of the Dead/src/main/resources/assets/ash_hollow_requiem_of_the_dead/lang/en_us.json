@@ -33,7 +33,10 @@
   "item.ash_hollow_requiem_of_the_dead.soul_fragment.tooltip": "Fragment of a tormented soul",
   "item.ash_hollow_requiem_of_the_dead.empty_ink_bottle.tooltip": "Can be filled at an Ink Mixer",
   "item.ash_hollow_requiem_of_the_dead.ink_bottle.tooltip": "Standard quality ink",
-  "item.ash_hollow_requiem_of_the_dead.soul_ink_bottle.tooltip": "Infused with tormented souls"
+  "item.ash_hollow_requiem_of_the_dead.soul_ink_bottle.tooltip": "Infused with tormented souls",
 
-
+  "curios.identifier.book": "Bounty Book",
+  "curios.modifiers.book": "When in Book slot:",
+  "curios.identifier.alchemists_tool": "Alchemist's Tool",
+  "curios.modifiers.alchemists_tool": "When in Tool slot:"
 }

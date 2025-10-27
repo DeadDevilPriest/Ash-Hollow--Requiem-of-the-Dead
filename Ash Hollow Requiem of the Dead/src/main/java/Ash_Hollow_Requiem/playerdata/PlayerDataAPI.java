@@ -86,6 +86,43 @@ public class PlayerDataAPI {
         });
     }
 
+    // ========== REBIRTH TOKENS ========== //
+
+    public static int getRebirthTokens(Player player) {
+        if (player == null) return 0;
+        return player.getCapability(PlayerDataProvider.PLAYER_DATA)
+                .map(PlayerData::getRebirthTokens)
+                .orElse(0);
+    }
+
+    public static void addRebirthTokens(Player player, int amount) {
+        if (player == null) return;
+        player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(data -> {
+            data.addRebirthTokens(amount);
+            syncToClient(player);
+        });
+    }
+
+    public static boolean spendRebirthTokens(Player player, int amount) {
+        if (player == null) return false;
+        boolean[] success = {false};
+        player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(data -> {
+            success[0] = data.spendRebirthTokens(amount);
+            if (success[0]) {
+                syncToClient(player);
+            }
+        });
+        return success[0];
+    }
+
+    public static void setRebirthTokens(Player player, int amount) {
+        if (player == null) return;
+        player.getCapability(PlayerDataProvider.PLAYER_DATA).ifPresent(data -> {
+            data.setRebirthTokens(amount);
+            syncToClient(player);
+        });
+    }
+
     // ========== SKILL POINTS ========== //
 
     public static int getSkillPoints(Player player) {
