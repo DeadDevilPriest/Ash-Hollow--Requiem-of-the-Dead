@@ -1,0 +1,49 @@
+{
+	"format_version": "1.8.0",
+	"animations": {
+		"animation.ink_press.press": {
+			"animation_length": 3,
+			"bones": {
+				"press": {
+					"position": {
+						"vector": [0, "-6.5+math.cos(query.anim_time*120)*6.5", 0]
+					}
+				},
+				"switch_b": {
+					"rotation": {
+						"vector": ["45-math.cos(query.anim_time*120)*45", 0, 0]
+					}
+				}
+			}
+		},
+		"animation.ink_press.turn_on": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 1.5,
+			"bones": {
+				"switch_a": {
+					"rotation": {
+						"vector": ["45-math.cos(query.anim_time*120)*45", 0, 0]
+					}
+				},
+				"switch_b": {
+					"rotation": {
+						"vector": [0, 0, 0]
+					}
+				}
+			}
+		},
+		"animation.ink_press.ink_press.turn_off": {
+			"loop": "hold_on_last_frame",
+			"animation_length": 1.5,
+			"override_previous_animation": true,
+			"bones": {
+				"switch_a": {
+					"rotation": {
+						"vector": ["45-(-math.cos(query.anim_time*120)*45)", 0, 0]
+					}
+				}
+			}
+		}
+	},
+	"geckolib_format_version": 2
+}
