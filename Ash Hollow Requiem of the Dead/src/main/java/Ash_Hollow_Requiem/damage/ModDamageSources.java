@@ -30,5 +30,7 @@ public class ModDamageSources {
         return new DamageSource(getType(level, "trauma"), target);
     }
 
-    
+    public static DamageSource necroticDamageSource(Level level, LivingEntity owner) {
+        return new DamageSource(getType(level, "necrotic"), target);
+    }
 }

@@ -25,19 +25,7 @@ import net.minecraft.world.level.Level;
  * Example with Thick Skin Level 5 (75% damage reduction, 40% duration reduction per stack):
  * - 1 stack: 0.25 damage/tick for 72 ticks (40% of 120)
  * - 5 stacks: 1.25 damage/tick for 180 ticks (40% of 300 per stack = 60% total)
- package Ash_Hollow_Requiem.effects;
-
- import Ash_Hollow_Requiem.damage.ModDamageTypes;
- import Ash_Hollow_Requiem.playerdata.PlayerData;
- import Ash_Hollow_Requiem.playerdata.PlayerDataProvider;
- import net.minecraft.world.damagesource.DamageSource;
- import net.minecraft.world.effect.MobEffect;
- import net.minecraft.world.effect.MobEffectCategory;
- import net.minecraft.world.entity.LivingEntity;
- import net.minecraft.world.entity.player.Player;
- import net.minecraft.world.level.Level;
-
- /**
+ *
  * Bleeding Effect - Now integrated with Skills system
  * Thick Skin skill reduces bleeding stacks
  */
